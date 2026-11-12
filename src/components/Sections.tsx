@@ -1,4 +1,4 @@
-import { FEATURED, SOCIAL_HANDLE, SOCIAL_TILES } from '../content/site';
+import { FEATURED, SOCIAL_HANDLE, SOCIAL_TILES, STORY_IMAGES } from '../content/site';
 import { words } from '../motion/useReveals';
 
 /* ------------------------------------------------------------------ Featured drop */
@@ -20,8 +20,8 @@ export function FeaturedDrop() {
           </span>
         </h2>
         <p className="section-lede" data-reveal="fade">
-          Four illustrative pieces showing how a drop could be presented. Not real inventory: names, prices and availability
-          will come from the boutique.
+          Four pieces showing how a drop could be presented, using illustrative stock photography. Not real inventory: names,
+          prices and availability will come from the boutique.
         </p>
       </div>
       <ul className="products" data-reveal="stagger">
@@ -72,7 +72,7 @@ export function Story() {
       </p>
       <div className="story-grid">
         <figure className="story-media story-media--tall" data-reveal="clip">
-          <img src="/media/edit-after-dark.svg" alt="Illustration: a satin slip dress hung in a dark arched niche." loading="lazy" width={800} height={1000} />
+          <img src={STORY_IMAGES.tall.src} alt={STORY_IMAGES.tall.alt} loading="lazy" width={1000} height={1250} />
         </figure>
         <div className="story-copy" data-reveal="fade">
           <h3>Individual, not uniform.</h3>
@@ -85,7 +85,7 @@ export function Story() {
           </p>
         </div>
         <figure className="story-media" data-reveal="clip">
-          <img src="/media/product-top-handle.svg" alt="Illustration: a deep rose top-handle bag on a plaster plinth." loading="lazy" width={800} height={1000} />
+          <img src={STORY_IMAGES.small.src} alt={STORY_IMAGES.small.alt} loading="lazy" width={1000} height={1250} />
         </figure>
       </div>
     </section>
@@ -109,7 +109,7 @@ export function SocialGallery() {
         </h2>
         <p className="social-handle" data-reveal="fade">
           <span>{SOCIAL_HANDLE}</span>
-          <span className="placeholder-note">Illustrative tiles. Live feed and link activate once account ownership is confirmed.</span>
+          <span className="placeholder-note">Illustrative stock photos. Live feed and link activate once account ownership is confirmed.</span>
         </p>
       </div>
       <ul className="social-grid" data-reveal="stagger">
@@ -185,7 +185,7 @@ export function SiteFooter() {
       </nav>
       <p className="footer-note">
         Internal concept demo prepared by Finatra.us for Katwalk Boutique, Baltimore, Maryland. Not an approved production
-        website. All imagery and products are illustrative.
+        website. All imagery and products are illustrative; photography via Unsplash.
       </p>
     </footer>
   );

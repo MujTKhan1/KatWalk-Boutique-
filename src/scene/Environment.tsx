@@ -4,7 +4,8 @@ import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { mats, blobShadowTexture } from './materials';
 import { makeArchTrimGeometry, makeFacadeGeometry, makeRunwayGeometry, makeSlab } from './geometry';
-import { LAYOUT } from '../motion/choreography';
+import { LAYOUT, PANEL_WALL } from '../motion/choreography';
+import { PANEL_ASPECT } from '../content/lookbook';
 
 /**
  * Directional daylight with soft real-time shadows (one shadow-casting light only),
@@ -43,7 +44,7 @@ export function Lighting() {
 
   return (
     <>
-      <hemisphereLight args={['#FFF5EA', '#E6D8CC', 1.05]} />
+      <hemisphereLight args={['#FFF4E8', '#D9CFC6', 0.82]} />
       {/* late-morning sun from front-left: it rakes across the plaster and pours through the arch */}
       <directionalLight
         ref={sun}
@@ -81,6 +82,7 @@ export function Architecture() {
       // shallow pilasters + lintel band framing the entrance: they catch the raking sun
       pilaster: makeSlab(0.46, 5.5, 0.12),
       lintel: makeSlab(entranceW + 2.6, 0.42, 0.14),
+      niches: makeNicheLiner(room.left, room.right),
     };
   }, [entranceX, entranceW, entranceH, fd, room]);
   useEffect(
@@ -100,21 +102,47 @@ export function Architecture() {
       <mesh geometry={geo.runway} material={m.runway} receiveShadow />
 
       {/* facade */}
-      <mesh geometry={geo.facade} material={m.facade} position={[geo.facadeLeft, 0, -fd / 2]} castShadow receiveShadow />
+      {/* extrude groups: [0] faces, [1] sides; the arch reveal takes the deeper plaster */}
+      <mesh geometry={geo.facade} material={[m.facade, m.reveal]} position={[geo.facadeLeft, 0, -fd / 2]} castShadow receiveShadow />
       <mesh geometry={geo.baseL} material={m.wallBack} position={[geo.facadeLeft, 0, fd / 2]} receiveShadow />
       <mesh geometry={geo.baseR} material={m.wallBack} position={[entranceX + entranceW / 2, 0, fd / 2]} receiveShadow />
       {/* one strong entrance arch, lined with a fine chrome trim */}
       <mesh geometry={geo.trim} material={m.chrome} position={[entranceX, 0, fd / 2 + 0.012]} />
-      <mesh geometry={geo.pilaster} material={m.facade} position={[entranceX - entranceW / 2 - 0.86, 0, fd / 2]} castShadow receiveShadow />
-      <mesh geometry={geo.pilaster} material={m.facade} position={[entranceX + entranceW / 2 + 0.4, 0, fd / 2]} castShadow receiveShadow />
-      <mesh geometry={geo.lintel} material={m.facade} position={[entranceX - entranceW / 2 - 1.3, 5.5, fd / 2]} castShadow receiveShadow />
+      <mesh geometry={geo.pilaster} material={[m.facade, m.reveal]} position={[entranceX - entranceW / 2 - 0.86, 0, fd / 2]} castShadow receiveShadow />
+      <mesh geometry={geo.pilaster} material={[m.facade, m.reveal]} position={[entranceX + entranceW / 2 + 0.4, 0, fd / 2]} castShadow receiveShadow />
+      <mesh geometry={geo.lintel} material={[m.facade, m.reveal]} position={[entranceX - entranceW / 2 - 1.3, 5.5, fd / 2]} castShadow receiveShadow />
 
       {/* interior */}
-      <mesh geometry={geo.side} material={m.wall} position={[room.left - 0.3, 0, -fd / 2]} rotation-y={Math.PI / 2} castShadow receiveShadow />
-      <mesh geometry={geo.side} material={m.wall} position={[room.right + 0.3, 0, room.back - 0.3]} rotation-y={-Math.PI / 2} castShadow receiveShadow />
-      <mesh geometry={geo.back} material={m.wallBack} position={[room.left - 0.3, 0, room.back - 0.3]} receiveShadow />
+      <mesh geometry={geo.side} material={[m.wall, m.reveal]} position={[room.left - 0.3, 0, -fd / 2]} rotation-y={Math.PI / 2} castShadow receiveShadow />
+      <mesh geometry={geo.side} material={[m.wall, m.reveal]} position={[room.right + 0.3, 0, room.back - 0.3]} rotation-y={-Math.PI / 2} castShadow receiveShadow />
+      {/* back wall reads as the deep recess colour; the liner in front carries the arched niches */}
+      <mesh geometry={geo.back} material={m.recess} position={[room.left - 0.3, 0, room.back - 0.3]} receiveShadow />
+      <mesh geometry={geo.niches} material={[m.wallBack, m.reveal]} position={[0, 0, room.back]} castShadow receiveShadow />
     </group>
   );
+}
+
+/** Plaster liner across the back wall with one arched niche per print (depth = recess). */
+function makeNicheLiner(left: number, right: number) {
+  const shape = new THREE.Shape();
+  shape.moveTo(left, 0);
+  shape.lineTo(right, 0);
+  shape.lineTo(right, 7.6);
+  shape.lineTo(left, 7.6);
+  shape.closePath();
+  PANEL_WALL.forEach((cfg) => {
+    const w = cfg.height * PANEL_ASPECT;
+    const r = (w + 1.0) / 2;
+    const top = cfg.pos.y + cfg.height / 2 + 0.75;
+    const hole = new THREE.Path();
+    hole.moveTo(cfg.pos.x - r, 0.32);
+    hole.lineTo(cfg.pos.x - r, top - r);
+    hole.absarc(cfg.pos.x, top - r, r, Math.PI, 0, true);
+    hole.lineTo(cfg.pos.x + r, 0.32);
+    hole.closePath();
+    shape.holes.push(hole);
+  });
+  return new THREE.ExtrudeGeometry(shape, { depth: 0.18, bevelEnabled: false, curveSegments: 40 });
 }
 
 export function BlobShadow({ position, scale, opacity = 1 }: { position: [number, number, number]; scale: [number, number]; opacity?: number }) {

@@ -57,14 +57,14 @@ export function buildSequenceTimeline(stage: HTMLElement) {
   tl.fromTo(
     q('[data-anim="lb-line"]'),
     { yPercent: 110 },
-    { yPercent: 0, duration: 0.1, stagger: 0.02, ease: 'power3.out' },
-    PHASE.resolve[0] + 0.02,
+    { yPercent: 0, duration: 0.07, stagger: 0.015, ease: 'power3.out' },
+    PHASE.resolve[0] + 0.085,
   );
   tl.fromTo(
     q('[data-anim="lb-meta"]'),
     { opacity: 0, y: 14 },
-    { opacity: 1, y: 0, duration: 0.08, ease: 'power2.out' },
-    PHASE.resolve[0] + 0.06,
+    { opacity: 1, y: 0, duration: 0.06, ease: 'power2.out' },
+    PHASE.resolve[0] + 0.09,
   );
 
   /* ---- Handoff: HTML cards fade in exactly over the WebGL panels (same image, same rect) */

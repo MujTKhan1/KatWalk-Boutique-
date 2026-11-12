@@ -26,7 +26,9 @@ npm run preview    # serve the production build on http://localhost:4173
 ## Page structure
 
 1. **Immersive sequence**: four viewport-length chapters on one pinned stage (400vh section):
-   *The boutique*, then *The entrance*, then *The collection*, then *The lookbook*.
+   *The boutique*, then *The entrance* (through the arch, then a sideways arc round the featured bag), then
+   *The collection*, then *The lookbook*. The ivory veil fully covers the room before the lookbook heading
+   arrives, and the heading clears the fixed header.
 2. **Featured drop**: four clearly labelled demo pieces, no prices or stock.
 3. **Boutique story**: proposed copy with a word-by-word reading reveal.
 4. **Social gallery**: illustrative tiles; handle shown but not linked until ownership is confirmed.
@@ -40,10 +42,25 @@ npm run preview    # serve the production build on http://localhost:4173
   hemisphere fill, a shadowless interior bounce, and layered contact-shadow decals.
 - **Architecture:** one strong entrance arch with shallow pilasters and a lintel, and the curved runway as the
   path through the boutique. The floating spheres, coral disc, ticker, badge and decorative arcades are removed.
-- **Featured accessory:** a custom 3D structured top-handle bag. Deep rose leather with clearcoat and sheen,
-  gold rings, clasp and feet. It turns about 30° toward the visitor on approach.
-- **Collection:** three framed prints with picture lamps on the back wall, a chrome rail with garments, and
-  folded knit stacks on a blush platform.
+- **Featured accessory:** a custom 3D structured top-handle bag. Muted rose pebbled leather, saddle stitching,
+  a painted edge, brass D-rings, a turn-lock clasp and feet. It turns to keep facing the visitor as the camera
+  arcs round it.
+- **Photography:** illustrative Unsplash stock photography in the three framed prints (inside darker arched
+  niches with picture lamps), the featured drop, story and social tiles. Credits are in ASSETS.md.
+- **Boutique life:** a chrome rail of seven draped garments, a plaster table of folded stacks, a leaning mirror
+  and a blush bench, all composed into the camera's path.
+- **Tonal depth:** a cooler honed-stone floor with joints, deeper plaster on the arch reveal and the niches,
+  lower ambient fill and stronger contact shadows.
+
+## Typography
+
+- **Display (main headings, wordmark, curtain):** Imbue. A condensed, high-contrast serif set in capitals at
+  optical size 100, following the Belange reference (which is commercial). Accent words switch to deep rose
+  rather than italics.
+- **Secondary serif:** Instrument Serif, for card and product names and the story statement.
+- **UI and body:** Manrope.
+
+All fonts are OFL and self-hosted, with the `--display`, `--serif` and `--sans` tokens in `src/styles.css`.
 
 ## Motion (Lusion-inspired, all reversible)
 
@@ -75,8 +92,8 @@ npm run preview    # serve the production build on http://localhost:4173
   - Procedural geometry and textures: no model or HDR downloads.
   - The 3D bundle is lazy-loaded only in immersive mode.
 
-Last measured build (gzip): critical JS 121 KB, lazy 3D chunk 250 KB, CSS 8 KB, hero still 38 KB WebP,
-artwork 2–7 KB per SVG.
+Last measured build (gzip): see `npm run build`. Photography is about 1.4 MB in total (nine WebP files, 90–300 KB each);
+only the three lookbook photos load with the 3D scene, and the rest are lazy-loaded.
 
 Not measured: frame rate, GPU timing and real-device performance. The review browser throttled
 `requestAnimationFrame` because its pane was hidden. Mobile was checked only in a 375×812 emulated viewport.

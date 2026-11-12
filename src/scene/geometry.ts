@@ -133,7 +133,7 @@ const halfWidthAt = (y: number) => BAG.bw / 2 - (y / BAG.h) * ((BAG.bw - BAG.tw)
 
 export function makeBagGeometries() {
   const { h, d } = BAG;
-  const rc = 0.035; // corner radius
+  const rc = 0.04; // corner radius
   const body = new THREE.Shape();
   const b = BAG.bw / 2;
   const t = BAG.tw / 2;
@@ -146,71 +146,126 @@ export function makeBagGeometries() {
   body.quadraticCurveTo(-t, h, -t - 0.004, h - rc);
   body.lineTo(-b + 0.004, rc);
   body.quadraticCurveTo(-b, 0, -b + rc, 0);
-  const bevel = 0.018;
+  // softer, rounder edges than before
+  const bevel = 0.026;
   const bodyGeo = new THREE.ExtrudeGeometry(body, {
     depth: d - bevel * 2,
     bevelEnabled: true,
     bevelThickness: bevel,
-    bevelSize: bevel * 0.9,
-    bevelSegments: 6,
-    curveSegments: 12,
+    bevelSize: bevel * 0.85,
+    bevelSegments: 10,
+    curveSegments: 16,
   });
-  bodyGeo.translate(0, bevel * 0.9, -(d - bevel * 2) / 2);
+  bodyGeo.translate(0, bevel * 0.85, -(d - bevel * 2) / 2);
+  const front = d / 2; // front face of the body
 
   // front flap: follows the tapered sides, curved lower edge
   const fy = 0.11;
   const flap = new THREE.Shape();
-  const ft = halfWidthAt(h) - 0.004;
-  const fb = halfWidthAt(fy + 0.05) - 0.004;
-  flap.moveTo(-ft, h + 0.004);
-  flap.lineTo(ft, h + 0.004);
+  const ft = halfWidthAt(h) - 0.006;
+  const fb = halfWidthAt(fy + 0.05) - 0.006;
+  flap.moveTo(-ft, h + 0.006);
+  flap.lineTo(ft, h + 0.006);
   flap.lineTo(fb, fy + 0.05);
   flap.quadraticCurveTo(0, fy - 0.035, -fb, fy + 0.05);
   flap.closePath();
+  const fBevel = 0.008;
   const flapGeo = new THREE.ExtrudeGeometry(flap, {
-    depth: 0.006,
+    depth: 0.004,
     bevelEnabled: true,
-    bevelThickness: 0.005,
-    bevelSize: 0.005,
-    bevelSegments: 3,
-    curveSegments: 24,
+    bevelThickness: fBevel,
+    bevelSize: 0.006,
+    bevelSegments: 6,
+    curveSegments: 32,
   });
-  flapGeo.translate(0, bevel * 0.9, d / 2 + 0.002);
+  const yOff = bevel * 0.85;
+  flapGeo.translate(0, yOff, front + 0.002);
+  const flapFront = front + 0.002 + 0.004 + fBevel;
 
-  // arched top handle
-  const hy = h + bevel;
+  // painted edge along the flap's curved lower edge
+  const edgeCurve = new THREE.CatmullRomCurve3(
+    new THREE.QuadraticBezierCurve(new THREE.Vector2(fb + 0.004, fy + 0.05), new THREE.Vector2(0, fy - 0.039), new THREE.Vector2(-fb - 0.004, fy + 0.05))
+      .getSpacedPoints(40)
+      .map((p) => new THREE.Vector3(p.x, p.y + yOff, front + 0.008)),
+  );
+  const edgeGeo = new THREE.TubeGeometry(edgeCurve, 80, 0.0032, 8, false);
+
+  // saddle stitching: flap (sides + curved hem) and the base seam of the body
+  const stitches: { p: THREE.Vector3; a: number }[] = [];
+  const addRun = (pts: THREE.Vector2[], z: number) => {
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i];
+      const c = pts[i + 1];
+      stitches.push({ p: new THREE.Vector3((a.x + c.x) / 2, (a.y + c.y) / 2 + yOff, z), a: Math.atan2(c.y - a.y, c.x - a.x) });
+    }
+  };
+  const inset = 0.014;
+  addRun(
+    new THREE.QuadraticBezierCurve(
+      new THREE.Vector2(fb - inset, fy + 0.05 + 0.01),
+      new THREE.Vector2(0, fy - 0.035 + inset + 0.004),
+      new THREE.Vector2(-fb + inset, fy + 0.05 + 0.01),
+    ).getSpacedPoints(64),
+    flapFront + 0.0006,
+  );
+  addRun(new THREE.LineCurve(new THREE.Vector2(fb - inset, fy + 0.06), new THREE.Vector2(ft - inset, h - 0.004)).getSpacedPoints(28), flapFront + 0.0006);
+  addRun(new THREE.LineCurve(new THREE.Vector2(-fb + inset, fy + 0.06), new THREE.Vector2(-ft + inset, h - 0.004)).getSpacedPoints(28), flapFront + 0.0006);
+  addRun(new THREE.LineCurve(new THREE.Vector2(-b + 0.05, 0.02), new THREE.Vector2(b - 0.05, 0.02)).getSpacedPoints(70), front + 0.0012);
+  const stitchGeo = new THREE.BoxGeometry(0.0042, 0.0013, 0.0012);
+
+  // arched top handle with leather tabs
+  const hy = h + bevel * 0.85;
   const handleCurve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-0.09, hy - 0.005, 0),
-    new THREE.Vector3(-0.088, hy + 0.07, 0),
-    new THREE.Vector3(-0.055, hy + 0.135, 0),
-    new THREE.Vector3(0, hy + 0.152, 0),
-    new THREE.Vector3(0.055, hy + 0.135, 0),
-    new THREE.Vector3(0.088, hy + 0.07, 0),
-    new THREE.Vector3(0.09, hy - 0.005, 0),
+    new THREE.Vector3(-0.09, hy + 0.012, 0),
+    new THREE.Vector3(-0.088, hy + 0.08, 0),
+    new THREE.Vector3(-0.055, hy + 0.142, 0),
+    new THREE.Vector3(0, hy + 0.158, 0),
+    new THREE.Vector3(0.055, hy + 0.142, 0),
+    new THREE.Vector3(0.088, hy + 0.08, 0),
+    new THREE.Vector3(0.09, hy + 0.012, 0),
   ]);
-  const handleGeo = new THREE.TubeGeometry(handleCurve, 96, 0.011, 16, false);
+  const handleGeo = new THREE.TubeGeometry(handleCurve, 120, 0.011, 20, false);
+  const tabGeo = makeRoundedBox(0.026, 0.05, 0.016, 0.006);
 
-  const ringGeo = new THREE.TorusGeometry(0.016, 0.0042, 12, 32);
-  const claspGeo = makeRoundedBox(0.07, 0.024, 0.012, 0.005);
-  const footGeo = new THREE.CylinderGeometry(0.011, 0.011, 0.008, 20);
+  // hardware: thicker D-rings, a turn-lock style clasp plate with a knob, gold feet
+  const ringGeo = new THREE.TorusGeometry(0.015, 0.0045, 16, 40);
+  const claspGeo = makeRoundedBox(0.074, 0.03, 0.008, 0.004);
+  const knobGeo = new THREE.CylinderGeometry(0.009, 0.0105, 0.01, 32);
+  const footGeo = new THREE.CylinderGeometry(0.011, 0.012, 0.009, 24);
 
   return {
     body: bodyGeo,
     flap: flapGeo,
+    edge: edgeGeo,
     handle: handleGeo,
+    tab: tabGeo,
     ring: ringGeo,
     clasp: claspGeo,
+    knob: knobGeo,
     foot: footGeo,
-    dims: { ...BAG, flapY: fy, handleY: hy, front: d / 2 + 0.014 },
+    stitch: stitchGeo,
+    stitches,
+    dims: { ...BAG, flapY: fy + yOff, handleY: hy, front: flapFront },
   };
 }
 
 /* --------------------------------------------------------------- collection rail garments
- * Simple garment silhouettes (hanging from y = 0), extruded with soft bevels.
+ * Garment silhouettes (hanging from y = 0), extruded with soft bevels and given a gentle
+ * drape: the hem swings forward and the body curves, so they read as cloth, not cut-outs.
  */
-function garment(shape: THREE.Shape) {
-  const g = new THREE.ExtrudeGeometry(shape, { depth: 0.02, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.01, bevelSegments: 2, curveSegments: 16 });
-  g.translate(0, 0, -0.01);
+function garment(shape: THREE.Shape, drape = 0.06) {
+  const g = new THREE.ExtrudeGeometry(shape, { depth: 0.024, bevelEnabled: true, bevelThickness: 0.014, bevelSize: 0.012, bevelSegments: 3, curveSegments: 20 });
+  g.translate(0, 0, -0.012);
+  const pos = g.attributes.position;
+  const v = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i);
+    const down = Math.max(0, -v.y);
+    // body curvature across the width + forward swing toward the hem
+    v.z += -0.08 * v.x * v.x + drape * down * down * 0.6;
+    pos.setXYZ(i, v.x, v.y, v.z);
+  }
+  g.computeVertexNormals();
   return g;
 }
 export function makeGarmentGeometries() {
@@ -218,25 +273,55 @@ export function makeGarmentGeometries() {
   dress.moveTo(-0.12, -0.06);
   dress.lineTo(0.12, -0.06);
   dress.lineTo(0.17, -0.32);
-  dress.quadraticCurveTo(0.23, -0.7, 0.3, -1.05);
-  dress.lineTo(-0.3, -1.05);
+  dress.quadraticCurveTo(0.23, -0.7, 0.3, -1.08);
+  dress.quadraticCurveTo(0, -1.12, -0.3, -1.08);
   dress.quadraticCurveTo(-0.23, -0.7, -0.17, -0.32);
   dress.closePath();
 
   const jacket = new THREE.Shape();
   jacket.moveTo(-0.16, -0.05);
   jacket.lineTo(0.16, -0.05);
-  jacket.lineTo(0.3, -0.14);
-  jacket.lineTo(0.34, -0.62);
-  jacket.lineTo(0.25, -0.62);
-  jacket.lineTo(0.23, -0.32);
-  jacket.lineTo(0.22, -0.66);
-  jacket.lineTo(-0.22, -0.66);
-  jacket.lineTo(-0.23, -0.32);
-  jacket.lineTo(-0.25, -0.62);
-  jacket.lineTo(-0.34, -0.62);
-  jacket.lineTo(-0.3, -0.14);
-  jacket.closePath();
+  jacket.quadraticCurveTo(0.27, -0.08, 0.31, -0.16);
+  jacket.lineTo(0.35, -0.62);
+  jacket.lineTo(0.25, -0.63);
+  jacket.lineTo(0.235, -0.32);
+  jacket.lineTo(0.225, -0.68);
+  jacket.quadraticCurveTo(0, -0.7, -0.225, -0.68);
+  jacket.lineTo(-0.235, -0.32);
+  jacket.lineTo(-0.25, -0.63);
+  jacket.lineTo(-0.35, -0.62);
+  jacket.lineTo(-0.31, -0.16);
+  jacket.quadraticCurveTo(-0.27, -0.08, -0.16, -0.05);
+
+  const coat = new THREE.Shape();
+  coat.moveTo(-0.16, -0.05);
+  coat.lineTo(0.16, -0.05);
+  coat.quadraticCurveTo(0.27, -0.08, 0.3, -0.16);
+  coat.lineTo(0.33, -0.7);
+  coat.lineTo(0.25, -0.7);
+  coat.lineTo(0.24, -0.36);
+  coat.lineTo(0.27, -1.12);
+  coat.quadraticCurveTo(0, -1.15, -0.27, -1.12);
+  coat.lineTo(-0.24, -0.36);
+  coat.lineTo(-0.25, -0.7);
+  coat.lineTo(-0.33, -0.7);
+  coat.lineTo(-0.3, -0.16);
+  coat.quadraticCurveTo(-0.27, -0.08, -0.16, -0.05);
+
+  const shirt = new THREE.Shape();
+  shirt.moveTo(-0.15, -0.05);
+  shirt.lineTo(0.15, -0.05);
+  shirt.lineTo(0.26, -0.12);
+  shirt.lineTo(0.3, -0.36);
+  shirt.lineTo(0.22, -0.38);
+  shirt.lineTo(0.21, -0.2);
+  shirt.lineTo(0.21, -0.74);
+  shirt.quadraticCurveTo(0, -0.79, -0.21, -0.74);
+  shirt.lineTo(-0.21, -0.2);
+  shirt.lineTo(-0.22, -0.38);
+  shirt.lineTo(-0.3, -0.36);
+  shirt.lineTo(-0.26, -0.12);
+  shirt.closePath();
 
   const trousers = new THREE.Shape();
   trousers.moveTo(-0.2, -0.06);
@@ -254,9 +339,11 @@ export function makeGarmentGeometries() {
     new THREE.Vector3(0.19, -0.07, 0),
   ]);
   return {
-    dress: garment(dress),
+    dress: garment(dress, 0.08),
     jacket: garment(jacket),
-    trousers: garment(trousers),
+    coat: garment(coat, 0.07),
+    shirt: garment(shirt),
+    trousers: garment(trousers, 0.04),
     hanger: new THREE.TubeGeometry(hangerCurve, 24, 0.006, 8, false),
     hook: new THREE.TorusGeometry(0.03, 0.005, 8, 24, Math.PI * 1.4),
   };

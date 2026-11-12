@@ -56,7 +56,7 @@ export function LookbookPreview({ immersive }: Props) {
         ))}
       </ul>
       <p className="illustrative-note" data-anim="lb-meta">
-        Illustrative placeholders. Photography and categories pending approval.
+        Illustrative stock photography (Unsplash). Categories and imagery pending the boutique's approval.
       </p>
     </div>
   );

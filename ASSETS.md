@@ -5,23 +5,45 @@ Every asset in this prototype is replaceable. Nothing here is Katwalk inventory 
 | Asset | File | Source / licence | Status |
 | --- | --- | --- | --- |
 | Wordmark "KATWALK" | typeset in Instrument Serif (`Header.tsx`) | Proposed typographic treatment | Pending the real logo; labelled "proposed wordmark" |
-| Headline serif | `@fontsource/instrument-serif` | SIL Open Font License 1.1, self-hosted | Proposed; brand fonts unconfirmed |
+| Display headings | `@fontsource-variable/imbue` (Imbue, optical-size axis) | SIL Open Font License 1.1, self-hosted | Proposed; chosen as a free alternative to the commercial "Belange" reference (condensed, high-contrast caps) |
+| Secondary serif | `@fontsource/instrument-serif` | SIL Open Font License 1.1, self-hosted | Card and product names, story text |
 | UI sans | `@fontsource-variable/manrope` | SIL Open Font License 1.1, self-hosted | Proposed |
-| Lookbook prints (3) | `public/media/edit-*.svg` | Original vector illustrations made for this demo (`scripts/make_bag_svg.py` generates Statement Pieces) | Illustrative placeholders, 4:5 |
-| Featured drop pieces (4) | `public/media/product-*.svg` | Original vector illustrations (`scripts/make_product_svgs.py`) | Demo pieces, not real inventory; no prices or stock |
-| Social gallery tiles | reuse the lookbook and product artwork | Local artwork, nothing scraped | Illustrative; feed and link inactive until account ownership is confirmed |
-| Featured 3D handbag | `makeBagGeometries` in `src/scene/geometry.ts` | Custom procedural model: structured top-handle bag with leather (clearcoat and sheen) and gold hardware, unbranded | Replace with a licensed GLB when available |
+| Lookbook prints (3) | `public/media/photos/print-*.webp` | Unsplash License stock photography (see credits below) | Illustrative, not Katwalk models or inventory |
+| Featured drop images (4) | `public/media/photos/product-*.webp` | Unsplash License stock photography | Demo pieces; no prices or stock |
+| Story images (2) | `public/media/photos/story-*.webp` | Unsplash License stock photography | Illustrative |
+| Social gallery tiles | reuse the photos above | Nothing scraped from social media | Illustrative; feed and link inactive until account ownership is confirmed |
+| Featured 3D handbag | `makeBagGeometries` in `src/scene/geometry.ts` | Custom procedural model: pebbled leather (runtime grain texture), saddle stitching, painted edge, brass D-rings, turn-lock clasp and feet; unbranded | Replace with a licensed GLB when available |
+| Stone floor, leather grain, fabric weave | `stoneTexture()`, `leatherGrain()`, `fabricTexture()` in `src/scene/materials.ts` | Generated at runtime (canvas) | No download |
 | Boutique architecture | `src/scene/geometry.ts`, `Environment.tsx` | Procedural: plaster facade with one arched entrance, pilasters, interior room, curved runway | Concept quality |
 | Plaster texture | `plasterTexture()` in `src/scene/materials.ts` | Generated at runtime (canvas noise) | No download |
-| Collection displays | `Display.tsx` | Procedural chrome rail, garment silhouettes, folded stacks | Stylised |
+| Boutique life | `Display.tsx` | Procedural: chrome rail with seven draped garments, plaster table with folded stacks, leaning mirror, blush bench | Stylised |
 | Reflections | three.js `RoomEnvironment` | Procedural, ships with three.js (MIT) | No HDR file needed |
 | Static hero still | `public/media/hero-still.webp` | Rendered from this scene (`/?capture` in dev) | Re-render after any scene change |
-| Hero bag illustration (legacy) | `public/media/hero-bag.svg` | Original vector illustration | No longer used in the scene; kept as source art for the product artwork |
+| Vector illustrations (unused alternates) | `public/media/edit-*.svg`, `product-*.svg`, `hero-bag.svg` | Original artwork (`scripts/make_*.py`) | Superseded by photography; kept as a no-download fallback set |
+
+## Photography credits (Unsplash License: free to use, attribution appreciated)
+
+Downloaded through the Unsplash CDN at 1000×1250 WebP crops. Licence confirmed on each photo page.
+
+| File | Photographer | Source |
+| --- | --- | --- |
+| `print-street-chic.webp` | Marcel Strauß | https://unsplash.com/photos/1FnVSX5flT8 |
+| `print-statement.webp` | Jahanzeb Ahsan (page also credits @mukhina_mira) | https://unsplash.com/photos/phWzbhrgvH0 |
+| `print-after-dark.webp` | FOTOGRAFÍA EDITORIAL | https://unsplash.com/photos/ZKPEw9BWFC8 |
+| `product-tote.webp` | Ugluk Potroshitel | https://unsplash.com/photos/XwjrPFW7xw0 |
+| `product-coats.webp` | Priscilla Du Preez | https://unsplash.com/photos/my5cwTzhmNI |
+| `product-satin.webp` | PRAHANT STUDIO | https://unsplash.com/photos/rDExPGnIuuc |
+| `product-denim.webp` | Mehrpouya H | https://unsplash.com/photos/3k5PytIyuBQ |
+| `story-pink-coat.webp` | Sasha Matveeva | https://unsplash.com/photos/pyPI14RrbvM |
+| `story-boutique-rail.webp` | Clark Street Mercantile | https://unsplash.com/photos/qnKhZJPKFD8 |
+
+These are stand-ins for the pitch. For production, use the boutique's own photography or properly licensed
+and released imagery. Stock models do not represent Katwalk.
 
 ## Substitutions and decisions
 
-- **Photography.** The client team decided large editorial photographs of people are not required for this
-  round. The prints and products are text-free vector illustrations, labelled on the page as illustrative or demo.
+- **Photography.** The vector illustrations were replaced with free Unsplash stock photography (credits
+  above), labelled on the page as illustrative stock. Photos showing visible third-party brand names were skipped.
 - **3D handbag.** We searched for a free-licence handbag model. Poly Haven has none, and general search found
   only paid or restrictive licences (CGTrader, RenderHub). So the bag is a custom procedural model built in
   code. To swap in a licensed GLB: keep the origin at the base centre, roughly 0.42 m wide, and replace
