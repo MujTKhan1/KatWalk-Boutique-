@@ -1,0 +1,115 @@
+"""Generates the illustrative handbag artwork (original, unbranded) used in the hero
+scene and in the Statement Pieces panel.  Run:  python scripts/make_bag_svg.py"""
+from pathlib import Path
+
+DEFS = """
+<linearGradient id="kbBody" x1="0" y1="0" x2="1" y2="0">
+  <stop offset="0" stop-color="#A92A55"/><stop offset=".16" stop-color="#D9527E"/>
+  <stop offset=".42" stop-color="#F47FA0"/><stop offset=".6" stop-color="#EC6C93"/>
+  <stop offset=".86" stop-color="#CF4A76"/><stop offset="1" stop-color="#9E2650"/>
+</linearGradient>
+<linearGradient id="kbShade" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#ffffff" stop-opacity=".10"/><stop offset=".55" stop-color="#000" stop-opacity="0"/>
+  <stop offset="1" stop-color="#4A0F25" stop-opacity=".38"/>
+</linearGradient>
+<linearGradient id="kbFlap" x1="0" y1="0" x2="1" y2="0">
+  <stop offset="0" stop-color="#C13A66"/><stop offset=".28" stop-color="#EA6D92"/>
+  <stop offset=".48" stop-color="#FF9DB6"/><stop offset=".7" stop-color="#EE7398"/><stop offset="1" stop-color="#B73460"/>
+</linearGradient>
+<linearGradient id="kbFlapV" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+  <stop offset="1" stop-color="#5A0F2A" stop-opacity=".18"/>
+</linearGradient>
+<linearGradient id="kbGold" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0" stop-color="#FFF3CF"/><stop offset=".35" stop-color="#EBC57E"/>
+  <stop offset=".62" stop-color="#B8893A"/><stop offset="1" stop-color="#F7DFA4"/>
+</linearGradient>
+<linearGradient id="kbHandle" x1="0" y1="0" x2="1" y2="0">
+  <stop offset="0" stop-color="#A92A55"/><stop offset=".3" stop-color="#E5658C"/>
+  <stop offset=".5" stop-color="#F68DA9"/><stop offset=".7" stop-color="#E5658C"/><stop offset="1" stop-color="#A92A55"/>
+</linearGradient>
+<radialGradient id="kbLime" cx=".35" cy=".3" r=".7">
+  <stop offset="0" stop-color="#F1FFD9"/><stop offset=".45" stop-color="#C7EF8B"/><stop offset="1" stop-color="#8DBF4E"/>
+</radialGradient>
+<filter id="kbBlur6" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter>
+<filter id="kbBlur3" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>
+<clipPath id="kbBodyClip"><path d="M232 340H568Q606 340 612 378L652 636Q660 692 606 692H194Q140 692 148 636L188 378Q194 340 232 340Z"/></clipPath>
+"""
+
+BAG = """
+<g>
+  <!-- arched top handle (echoes the chrome arch) -->
+  <path d="M300 344C300 146 500 146 500 344" fill="none" stroke="#7E1D40" stroke-opacity=".35" stroke-width="34" stroke-linecap="round" transform="translate(4 6)" filter="url(#kbBlur3)"/>
+  <path d="M300 344C300 146 500 146 500 344" fill="none" stroke="url(#kbHandle)" stroke-width="30" stroke-linecap="round"/>
+  <path d="M306 318C308 186 392 168 440 182" fill="none" stroke="#FFD2DE" stroke-opacity=".75" stroke-width="5" stroke-linecap="round"/>
+  <path d="M300 344C300 146 500 146 500 344" fill="none" stroke="#FFD3DF" stroke-opacity=".5" stroke-width="2" stroke-dasharray="6 7"/>
+  <!-- gold rings -->
+  <ellipse cx="300" cy="350" rx="17" ry="21" fill="none" stroke="url(#kbGold)" stroke-width="7"/>
+  <ellipse cx="500" cy="350" rx="17" ry="21" fill="none" stroke="url(#kbGold)" stroke-width="7"/>
+  <!-- body -->
+  <path d="M232 340H568Q606 340 612 378L652 636Q660 692 606 692H194Q140 692 148 636L188 378Q194 340 232 340Z" fill="url(#kbBody)"/>
+  <g clip-path="url(#kbBodyClip)">
+    <rect x="130" y="330" width="540" height="370" fill="url(#kbShade)"/>
+    <path d="M226 352H574Q600 352 604 378L620 480Q400 558 180 480L196 378Q200 352 226 352Z" fill="#5A0F2A" opacity=".38" filter="url(#kbBlur6)"/>
+    <path d="M214 500Q226 590 206 676" fill="none" stroke="#fff" stroke-opacity=".38" stroke-width="16" stroke-linecap="round" filter="url(#kbBlur6)"/>
+    <path d="M598 520Q612 600 622 670" fill="none" stroke="#4A0F25" stroke-opacity=".3" stroke-width="22" filter="url(#kbBlur6)"/>
+  </g>
+  <path d="M240 356H560Q590 356 595 386L632 630Q638 672 598 672H202Q162 672 168 630L205 386Q210 356 240 356Z" fill="none" stroke="#FFD3DF" stroke-opacity=".55" stroke-width="2.5" stroke-dasharray="7 7"/>
+  <path d="M196 690H604" stroke="#8E2148" stroke-opacity=".55" stroke-width="6" stroke-linecap="round"/>
+  <!-- leather tabs -->
+  <rect x="287" y="360" width="26" height="40" rx="8" fill="#C4416B"/>
+  <rect x="487" y="360" width="26" height="40" rx="8" fill="#C4416B"/>
+  <!-- flap -->
+  <path d="M226 342H574Q600 342 604 368L620 470Q400 548 180 470L196 368Q200 342 226 342Z" fill="url(#kbFlap)"/>
+  <path d="M226 342H574Q600 342 604 368L620 470Q400 548 180 470L196 368Q200 342 226 342Z" fill="url(#kbFlapV)"/>
+  <path d="M234 358H566Q586 358 589 378L602 460Q400 528 198 460L211 378Q214 358 234 358Z" fill="none" stroke="#FFD3DF" stroke-opacity=".6" stroke-width="2.5" stroke-dasharray="7 7"/>
+  <path d="M258 376Q400 364 536 376" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="9" stroke-linecap="round" filter="url(#kbBlur3)"/>
+  <!-- clasp -->
+  <rect x="358" y="482" width="84" height="32" rx="16" fill="#6E1A38" opacity=".35" transform="translate(2 4)" filter="url(#kbBlur3)"/>
+  <rect x="358" y="482" width="84" height="32" rx="16" fill="url(#kbGold)"/>
+  <rect x="370" y="491" width="60" height="14" rx="7" fill="#B8893A" opacity=".55"/>
+  <path d="M368 488H430" stroke="#FFF6DD" stroke-width="3" stroke-linecap="round" opacity=".9"/>
+  <!-- feet -->
+  <ellipse cx="214" cy="697" rx="12" ry="6" fill="url(#kbGold)"/>
+  <ellipse cx="586" cy="697" rx="12" ry="6" fill="url(#kbGold)"/>
+  <!-- lime charm -->
+  <path d="M298 370Q290 400 286 428" fill="none" stroke="url(#kbGold)" stroke-width="3"/>
+  <circle cx="285" cy="446" r="17" fill="url(#kbLime)"/>
+  <circle cx="279" cy="440" r="5" fill="#fff" opacity=".8"/>
+</g>
+"""
+
+
+def svg(w, h, view, defs, body):
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="{view}">'
+            f'<defs>{defs}</defs>{body}</svg>\n')
+
+
+root = Path(__file__).resolve().parent.parent / "public" / "media"
+
+# 1) hero accessory: transparent background, square, bag bottom near the bottom edge
+(root / "hero-bag.svg").write_text(svg(1024, 1024, "100 100 600 600", DEFS, BAG), encoding="utf-8")
+
+# 2) Statement Pieces panel, re-composed around the same bag
+GRAIN = ('<filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.85" '
+         'numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.14  0 0 0 0 0.13  0 0 0 0 0.14  0 0 0 0.07 0"/></filter>'
+         '<filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>')
+PANEL_DEFS = DEFS + GRAIN + """
+<linearGradient id="pbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE6DE"/><stop offset="1" stop-color="#F9C9D3"/></linearGradient>
+<radialGradient id="psun" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#FFA08F"/><stop offset="1" stop-color="#FF786B"/></radialGradient>
+<linearGradient id="pplinth" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFE9EE"/><stop offset=".6" stop-color="#F7CED8"/><stop offset="1" stop-color="#E8AEBD"/></linearGradient>
+"""
+panel = """
+<rect width="800" height="1000" fill="url(#pbg)"/>
+<circle cx="540" cy="330" r="210" fill="url(#psun)"/>
+<line x1="80" y1="140" x2="720" y2="140" stroke="#242124" stroke-opacity=".2" stroke-width="2"/>
+<ellipse cx="400" cy="735" rx="240" ry="26" fill="#7E1D40" opacity=".14" filter="url(#soft)"/>
+<rect x="230" y="730" width="340" height="270" fill="url(#pplinth)"/>
+<ellipse cx="400" cy="730" rx="170" ry="30" fill="#FFF1F4"/>
+<ellipse cx="400" cy="728" rx="130" ry="14" fill="#7E1D40" opacity=".22" filter="url(#soft)"/>
+<g transform="translate(100 210) scale(0.75)">""" + BAG + """</g>
+<circle cx="150" cy="860" r="7" fill="#C7EF8B"/>
+<rect width="800" height="1000" filter="url(#grain)"/>
+"""
+(root / "edit-statement-pieces.svg").write_text(svg(800, 1000, "0 0 800 1000", PANEL_DEFS, panel), encoding="utf-8")
+print("ok")
