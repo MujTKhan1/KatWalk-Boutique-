@@ -1,43 +1,51 @@
 import * as THREE from 'three';
 
-import { PHASE, range, easeInOut, easeOut } from './phases';
+import { PHASE, range, easeInOut } from './phases';
 
 export * from './phases';
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-/* ---------------------------------------------------------------- layout (world units, roughly metres) */
+/* ---------------------------------------------------------------- layout (metres) */
 export const LAYOUT = {
-  arch: new THREE.Vector3(1.45, 0, -1.2),
-  archInnerWidth: 2.1,
-  archLegHeight: 2.15,
-  pedestal: new THREE.Vector3(2.85, 0, 0.55),
-  pedestalHeight: 0.8,
-  pedestalRadius: 0.56,
-  plinthHeight: 0.16,
+  /** facade plane (front face at z = +facadeDepth/2) */
+  facadeDepth: 0.6,
+  entranceX: 2.2,
+  entranceW: 3.0,
+  entranceH: 4.5,
+  /** interior room */
+  room: { left: -4.6, right: 9.2, back: -14 },
+  /** featured display, inside on the axis of the entrance */
+  display: new THREE.Vector3(2.35, 0, -5),
+  platformRadius: 0.95,
+  platformHeight: 0.16,
+  plinthRadius: 0.4,
+  plinthHeight: 0.86,
+  /** scale applied to the bag model (real size x1.5 for presence) */
+  bagScale: 1.5,
 };
 
 /* ---------------------------------------------------------------- camera rail
- * Positions and look targets are Catmull-Rom splines sampled by arc length.
- * The rail passes through the chrome arch (z = -1.2) on its centre line.
+ * Outside the facade -> through the arch -> toward the featured display -> turn to the
+ * back wall where the editorial prints hang. Arc-length sampled, so speed is even.
  */
 const camRail = new THREE.CatmullRomCurve3(
   [
-    new THREE.Vector3(-0.1, 1.85, 9.6),
-    new THREE.Vector3(0.85, 1.6, 4.6),
-    new THREE.Vector3(1.45, 1.55, 1.2),
-    new THREE.Vector3(1.45, 1.57, -0.6),
-    new THREE.Vector3(1.4, 1.58, -1.9),
+    new THREE.Vector3(1.15, 1.75, 13.6),
+    new THREE.Vector3(1.85, 1.64, 6.4),
+    new THREE.Vector3(2.2, 1.58, 1.4),
+    new THREE.Vector3(1.75, 1.58, -1.0),
+    new THREE.Vector3(0.75, 1.66, -1.8),
   ],
   false,
   'centripetal',
 );
 const lookRail = new THREE.CatmullRomCurve3(
   [
-    new THREE.Vector3(0.05, 1.2, -1.2),
-    new THREE.Vector3(1.5, 1.35, -2.2),
-    new THREE.Vector3(1.45, 1.45, -5.5),
-    new THREE.Vector3(1.4, 1.45, -8.5),
-    new THREE.Vector3(1.4, 1.42, -9.5),
+    new THREE.Vector3(-0.55, 2.05, 0),
+    new THREE.Vector3(1.6, 1.6, -3),
+    new THREE.Vector3(2.35, 1.2, -5),
+    new THREE.Vector3(2.6, 1.55, -9),
+    new THREE.Vector3(2.95, 1.95, -13.5),
   ],
   false,
   'centripetal',
@@ -53,78 +61,55 @@ export function cameraPose(p: number, pos: THREE.Vector3, look: THREE.Vector3) {
   lookRail.getPointAt(u, look);
 }
 
-/** slight roll for a cinematic feel as we bank through the arch (radians) */
+/** a whisper of roll as we pass the threshold */
 export function cameraRoll(p: number) {
   const t = range(p, PHASE.approach[0], PHASE.frame[1]);
-  return Math.sin(t * Math.PI) * -0.018;
+  return Math.sin(t * Math.PI) * -0.012;
 }
 
 /** restrained pointer parallax, faded out before the DOM handoff */
 export function parallaxWeight(p: number) {
-  return 1 - range(p, 0.7, PHASE.resolve[0]);
+  return 1 - range(p, 0.68, PHASE.resolve[0]);
 }
 
 /* ---------------------------------------------------------------- objects */
-/** the illustrated bag lifts gently off the pedestal as the camera approaches (metres) */
-export function handbagLift(p: number) {
-  return Math.sin(easeInOut(range(p, PHASE.approach[0], PHASE.frame[1])) * Math.PI) * 0.07;
+/** the bag turns ~30 degrees toward the visitor as they approach */
+export function handbagRotation(p: number) {
+  return -0.42 + easeInOut(range(p, PHASE.approach[0], PHASE.frame[1])) * 0.55;
 }
 
-/** coral sun disc: rises and swells slightly as we travel into the gallery */
-export function sunState(p: number) {
-  const t = easeInOut(range(p, 0, PHASE.camera[1]));
-  return { y: 3.4 + t * 0.8, scale: 1 + t * 0.25 };
-}
-
-/** runway placements for the editorial panels (index 0 is visible in the hero, framed by the arch) */
 /**
- * Indexed like LOOKBOOK. The dark After-Dark panel (index 2) stands framed inside the chrome
- * arch in the hero: it is the strongest value contrast in the composition.
+ * Editorial prints hung on the back wall, indexed like LOOKBOOK.
+ * After-Dark (index 2) hangs on the entrance axis, so it is framed by the arch in the opening view.
  */
-export const PANEL_RUNWAY = [
-  { pos: new THREE.Vector3(3.7, 0, -9.9), rotY: -0.35, height: 1.85, rise: [0.48, 0.64] as const },
-  { pos: new THREE.Vector3(-0.3, 0, -9.4), rotY: 0.3, height: 1.85, rise: [0.54, 0.7] as const },
-  { pos: new THREE.Vector3(2.2, 0, -7.0), rotY: -0.1, height: 2.0, rise: [0, 0] as const },
+export const PANEL_WALL = [
+  { pos: new THREE.Vector3(-0.9, 2.25, -13.62), height: 2.3 },
+  { pos: new THREE.Vector3(7.0, 2.25, -13.62), height: 2.3 },
+  { pos: new THREE.Vector3(3.15, 2.4, -13.62), height: 2.7 },
 ];
 
-/**
- * Floating pearls that give the gallery depth and parallax. Each drifts upward by a fixed
- * amount over the sequence (pure function of progress, so fully reversible).
- */
-export const PEARLS = [
-  { pos: new THREE.Vector3(3.75, 1.95, 1.3), r: 0.075, mat: 'pearl', drift: 0.35 },
-  { pos: new THREE.Vector3(2.75, 2.75, 0.4), r: 0.05, mat: 'raspberry', drift: 0.5 },
-  { pos: new THREE.Vector3(1.15, 3.35, -4.6), r: 0.09, mat: 'chrome', drift: 0.3 },
-  { pos: new THREE.Vector3(3.3, 2.85, -3.4), r: 0.13, mat: 'pearl', drift: 0.25 },
-  { pos: new THREE.Vector3(1.6, 0.55, 3.4), r: 0.04, mat: 'lime', drift: 0.6 },
-  { pos: new THREE.Vector3(0.35, 1.05, -9.2), r: 0.11, mat: 'raspberry', drift: 0.3 },
-  { pos: new THREE.Vector3(4.7, 1.4, -1.6), r: 0.16, mat: 'chrome', drift: 0.2 },
-  { pos: new THREE.Vector3(1.0, 3.2, -7.5), r: 0.14, mat: 'pearl', drift: 0.25 },
-] as const;
-
-export function pearlOffset(drift: number, p: number) {
-  return easeInOut(range(p, 0, PHASE.camera[1])) * drift;
+/** prints are already hanging; this is kept for API compatibility (always 1) */
+export function panelRise() {
+  return 1;
 }
 
-/** 0 = sunk below the runway, 1 = standing */
-export function panelRise(i: number, p: number) {
-  const [a, b] = PANEL_RUNWAY[i].rise;
-  if (a === b) return 1;
-  return easeOut(range(p, a, b));
-}
-
-/** 0 = on the runway, 1 = locked to its HTML card */
+/** 0 = on the wall, 1 = locked to its HTML card */
 export function panelResolve(i: number, p: number) {
   const stagger = i * 0.02;
   return easeInOut(range(p, PHASE.resolve[0] + stagger, PHASE.resolve[1] - 0.04 + stagger));
 }
 
-/** ivory veil that softens the gallery behind the lookbook */
-export function veilOpacity(p: number) {
-  return easeInOut(range(p, PHASE.resolve[0], PHASE.resolve[1])) * 0.9;
+/** gallery picture lights brighten as the interior is revealed */
+export function galleryLight(p: number) {
+  return 0.35 + easeInOut(range(p, PHASE.frame[0], PHASE.reveal[0] + 0.1)) * 0.65;
 }
 
-/** WebGL panels hide once HTML cards are fully opaque on top of them */
+/** ivory veil that softens the room behind the lookbook */
+export function veilOpacity(p: number) {
+  return easeInOut(range(p, PHASE.resolve[0], PHASE.resolve[1])) * 0.92;
+}
+
+/** WebGL prints hide once HTML cards are fully opaque on top of them */
 export function glPanelsVisible(p: number) {
   return p < PHASE.handoff[1];
 }

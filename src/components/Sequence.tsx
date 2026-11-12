@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback, useRef, useState } from 'react';
 import { useSequenceDriver } from '../motion/useSequenceDriver';
 import { buildSequenceTimeline } from '../motion/domTimeline';
 import { CHAPTERS } from '../motion/phases';
-import { HeroCopy, HeroTicker } from './HeroCopy';
+import { HeroCopy } from './HeroCopy';
 import { LookbookPreview } from './Lookbook';
 
 const SceneCanvas = lazy(() => import('../scene/SceneCanvas'));
@@ -35,8 +35,6 @@ export function Sequence({ parallax, capture, onFailure }: Props) {
         </div>
 
         <HeroCopy immersive />
-
-        <HeroTicker />
 
         <div className="scroll-cue" data-anim="cue" aria-hidden="true">
           <span>Scroll</span>

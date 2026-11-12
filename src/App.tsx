@@ -4,7 +4,9 @@ import { useExperienceMode } from './hooks/useExperienceMode';
 import { Header, SkipLink } from './components/Header';
 import { Sequence } from './components/Sequence';
 import { StaticExperience } from './components/StaticExperience';
-import { PlannedSections } from './components/PlannedSections';
+import { FeaturedDrop, PageCurtain, SiteFooter, SocialGallery, Story, Visit } from './components/Sections';
+import { useReveals } from './motion/useReveals';
+import { usePageTransitions } from './motion/usePageTransitions';
 
 export default function App() {
   const { mode, reason, reportFailure, parallax, capture } = useExperienceMode();
@@ -16,6 +18,9 @@ export default function App() {
     return () => cancelAnimationFrame(id);
   }, [mode]);
 
+  useReveals([mode]);
+  usePageTransitions();
+
   return (
     <>
       <SkipLink />
@@ -26,8 +31,13 @@ export default function App() {
         ) : (
           <StaticExperience reason={reason} />
         )}
-        <PlannedSections />
+        <FeaturedDrop />
+        <Story />
+        <SocialGallery />
+        <Visit />
       </main>
+      <SiteFooter />
+      <PageCurtain />
     </>
   );
 }

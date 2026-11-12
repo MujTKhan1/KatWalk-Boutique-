@@ -107,6 +107,14 @@ export function useSequenceDriver({ sectionRef, stageRef, buildTimeline, paralla
       };
       gsap.ticker.add(tick);
 
+      store.snap = () => {
+        ScrollTrigger.update();
+        store.target = st.progress;
+        store.p = st.progress;
+        tl.progress(store.p);
+        store.invalidate();
+      };
+
       if (import.meta.env.DEV) {
         // verification helper: snap the damped value to the scroll target (used when the
         // preview browser throttles rAF); has no effect on normal behaviour
@@ -121,6 +129,7 @@ export function useSequenceDriver({ sectionRef, stageRef, buildTimeline, paralla
         gsap.ticker.remove(tick);
         ScrollTrigger.removeEventListener('refreshInit', onRefreshInit);
         ScrollTrigger.removeEventListener('refresh', onRefreshed);
+        store.snap = () => {};
       };
     }, stage);
 

@@ -1,11 +1,11 @@
-# Katwalk Boutique: immersive hero prototype
+# Katwalk Boutique: immersive landing page prototype
 
 Internal concept demo prepared by Finatra.us for prospect review. **Not an approved production website.**
-All imagery, copy, categories and the wordmark are illustrative, pending the boutique's approval.
+All imagery, products, copy and the wordmark are illustrative, pending the boutique's approval.
 
-Central idea: *the runway becomes the collection.* One continuous boutique scene. As you scroll, the camera
-dollies toward the vitrine, passes through the chrome arch, and editorial panels rise along the blush runway.
-The panels then fly into the exact positions of the HTML lookbook cards, which take over seamlessly.
+Central idea: visitors scroll *into* the boutique. The page opens on a warm plaster facade with one arched
+entrance. The camera passes through the arch toward a featured display, the interior reveals framed
+editorial prints and collection displays, and the prints lift off the wall to settle into the HTML lookbook.
 
 ## Run it
 
@@ -16,8 +16,6 @@ npm run build      # typecheck (tsc -b) + production build to dist/
 npm run preview    # serve the production build on http://localhost:4173
 ```
 
-### Testing switches (query string)
-
 | URL | Effect |
 | --- | --- |
 | `/?mode=static` | Force the composed static hero (same as mobile / reduced motion) |
@@ -25,92 +23,62 @@ npm run preview    # serve the production build on http://localhost:4173
 | `/?nowebgl` | Simulate WebGL being unavailable |
 | `/?capture` (dev only) | Exposes `__katwalkCapture()`, which re-renders `public/media/hero-still.webp` from the live scene |
 
-## How it is built
+## Page structure
 
-React 19 + TypeScript, Vite, Three.js via React Three Fiber, GSAP + ScrollTrigger.
+1. **Immersive sequence**: four viewport-length chapters on one pinned stage (400vh section):
+   *The boutique*, then *The entrance*, then *The collection*, then *The lookbook*.
+2. **Featured drop**: four clearly labelled demo pieces, no prices or stock.
+3. **Boutique story**: proposed copy with a word-by-word reading reveal.
+4. **Social gallery**: illustrative tiles; handle shown but not linked until ownership is confirmed.
+5. **Find Your Next Look**: closing section; the inquiry route awaits approval, so no form is shown.
 
-```
-src/
-  motion/
-    phases.ts            phase timings + easing (no three.js, so static mode never loads the 3D bundle)
-    choreography.ts      camera rail, object/panel transforms: pure functions of progress
-    store.ts             shared progress store (target, damped p, pointer, card elements)
-    useSequenceDriver.ts ScrollTrigger -> damped progress -> HTML timeline + WebGL invalidate
-    domTimeline.ts       paused GSAP timeline (duration 1) for the HTML layers
-  scene/                 one <Canvas>: CameraRig, Gallery, Display (pedestal, arch, bag), Panels (+ veil)
-  components/            Header, HeroCopy, Lookbook, Sequence (immersive), StaticExperience, PlannedSections
-  hooks/useExperienceMode.ts   immersive vs static decision (live on resize / reduced-motion change)
-  content/lookbook.ts    lookbook data + image paths (swap for approved photography)
-```
+## Art direction
 
-**Palette.** Ivory ground with layered pinks: petal, blush, rose, raspberry (text-safe `#C2416C` for the
-italic accent) and peach. Coral is the warm accent (CTA, sun disc) and lime appears only in tiny details.
-Tokens live in `src/styles.css` (`:root`) and `src/scene/materials.ts` (`PALETTE`).
+- **Surfaces:** warm ivory plaster (procedural, tileable texture used as colour and bump). Blush appears only
+  on the display platforms and the runway. Chrome is limited to the entrance trim and the rail.
+- **Light:** one directional "late-morning sun" with soft real-time shadows (2048 map, PCF soft), a warm
+  hemisphere fill, a shadowless interior bounce, and layered contact-shadow decals.
+- **Architecture:** one strong entrance arch with shallow pilasters and a lintel, and the curved runway as the
+  path through the boutique. The floating spheres, coral disc, ticker, badge and decorative arcades are removed.
+- **Featured accessory:** a custom 3D structured top-handle bag. Deep rose leather with clearcoat and sheen,
+  gold rings, clasp and feet. It turns about 30° toward the visitor on approach.
+- **Collection:** three framed prints with picture lamps on the back wall, a chrome rail with garments, and
+  folded knit stacks on a blush platform.
 
-**Hero accessory.** A detailed static illustration (`public/media/hero-bag.svg`) on a camera-facing plane
-atop a raspberry plinth and blush pedestal. It stays crisp from every point on the camera rail and lifts
-gently as the camera approaches.
+## Motion (Lusion-inspired, all reversible)
 
-**Depth and focus.** The dark After-Dark panel stands inside the chrome arch as the hero's focal point.
-Eight glossy pearls (pearl, chrome, raspberry, one lime) float through the gallery for parallax depth. Each
-drifts by a fixed amount as a pure function of progress. The primary CTA has a subtle magnetic pull and a
-sheen on hover (mouse only, off for reduced motion).
+- **One progress value drives everything.** Native scroll goes through ScrollTrigger into a single damped
+  progress value. The camera spline, bag rotation, gallery light, print flight, veil and HTML timeline are
+  all pure functions of it, so scrolling up reconstructs every frame exactly.
+- **WebGL to HTML handoff.** Each print unprojects its HTML card's live rect and flies onto it. It uses an
+  unlit, non-tone-mapped material with the same file as the `<img>`, so the swap is invisible.
+- **Section reveals** (`useReveals`): masked line rises, clip-path image unveils with a counter-zoom,
+  staggered card rises, and word-fill reading. All are scrubbed to scroll, so they reverse too.
+- **Page transitions** (`usePageTransitions`): in-page links trigger a plaster curtain wipe. The page jumps
+  and the 3D sequence snaps exactly, focus moves to the destination, and the curtain lifts. Links stay
+  ordinary hrefs.
+- **Hover:** a magnetic primary CTA with a sheen sweep, and slow image zooms on product and social tiles.
+- **Reduced motion:** static hero, no reveals or curtain, native jumps.
 
-**Reversibility.** Native scroll, with no hijacking. The stage is pinned with CSS `position: sticky`, and
-ScrollTrigger only reports progress. One ticker damps that value into `p`. Every visual is a pure function
-of `p`: the camera spline, bag rotation, panel rise and flight, the veil, and the HTML timeline via
-`tl.progress(p)`. There are no independent tweens and no accumulated state, so scrubbing upward
-reconstructs each prior frame exactly.
+## Accessibility and performance
 
-**WebGL to HTML handoff.** During *Resolve*, each panel unprojects its HTML card's live
-`getBoundingClientRect()` onto a plane 2.4 units in front of the camera. It then interpolates position,
-rotation and scale onto that exact rect. The panel uses an unlit, non-tone-mapped material with the same
-SVG file as the `<img>`, so the pixels match. The HTML cards fade in on top, then the GL panels hide.
-Pointer parallax is faded to zero before this phase, so the alignment is exact.
+- **Accessibility:**
+  - All copy and controls are HTML above an `aria-hidden` canvas.
+  - There's a skip link and visible focus styles.
+  - If a CTA is focused after the hero has exited, the page scrolls back to it.
+  - The primary CTA is charcoal on coral (about 6.2:1).
+  - Static fallback for mobile, reduced motion, WebGL failure and context loss.
+- **Performance:**
+  - `frameloop="demand"`: the scene renders only on change, and pauses offscreen.
+  - DPR capped at 1.75.
+  - One shadow-casting light, no post-processing.
+  - Procedural geometry and textures: no model or HDR downloads.
+  - The 3D bundle is lazy-loaded only in immersive mode.
 
-**Resize / refresh.** Resizing inside the sequence keeps the same *progress*, not the same pixel offset.
-A refresh mid-sequence restores straight to the current state with no fly-through, and the entrance
-animation is skipped.
+Last measured build (gzip): critical JS 121 KB, lazy 3D chunk 250 KB, CSS 8 KB, hero still 38 KB WebP,
+artwork 2–7 KB per SVG.
 
-**Performance measures.**
-- `frameloop="demand"`: the scene renders only while progress, pointer or intro values change.
-- Rendering pauses when the stage is offscreen (IntersectionObserver).
-- DPR is capped at 1.75.
-- No real-time shadow maps (baked radial contact shadows instead) and no post-processing.
-- Reflections come from a procedural `RoomEnvironment`, with no HDR download.
-- The 3D bundle is lazy-loaded only in immersive mode, and lookbook images below the fold are lazy-loaded.
+Not measured: frame rate, GPU timing and real-device performance. The review browser throttled
+`requestAnimationFrame` because its pane was hidden. Mobile was checked only in a 375×812 emulated viewport.
 
-**Accessibility.**
-- The headline and CTAs are real HTML above the canvas, and the canvas is `aria-hidden`.
-- There's a skip link ("Skip the intro animation") and visible focus styles throughout.
-- Focusing a hero CTA after the copy has exited scrolls back so focus is never invisible.
-- Primary CTA uses charcoal text on coral (about 6.2:1); white on coral would fail AA.
-- Reduced motion, viewports under 900px, missing WebGL, scene errors and a lost WebGL context all fall
-  back to the static hero, a pre-rendered still of the same scene.
-
-## Budgets (proposed vs measured)
-
-Measured from `npm run build` output, gzip sizes:
-
-| Item | Budget | Measured |
-| --- | --- | --- |
-| Critical JS (React, GSAP, app) | ≤ 130 KB | **119 KB** |
-| Lazy 3D chunk (three, R3F, scene), immersive only | ≤ 260 KB | **248 KB** |
-| CSS | ≤ 10 KB | **7 KB** |
-| Hero still (fallback) | ≤ 60 KB | **50 KB** WebP |
-| Hero handbag illustration | ≤ 15 KB | **5.8 KB** SVG |
-| Lookbook placeholders | ≤ 10 KB each | **2.4–2.7 KB** SVG |
-| Fonts, latin subsets actually used | ≤ 80 KB | ~68 KB woff2 (3 files) |
-
-Not measured: frame rate, GPU timing, draw calls, and real-device performance. The review browser throttled
-`requestAnimationFrame` because its pane was hidden, so no FPS numbers are claimed. No mobile or touch hardware
-was tested; mobile was checked only in a 375×812 emulated viewport.
-
-## Still to do / open items
-
-- Remaining sections: featured drop, full style edits, social gallery, final conversion route. These are
-  planned only; the current CTAs land on minimal, honest placeholders.
-- Real photography, logo, fonts, categories, contact route and social ownership all await approval.
-  See [ASSETS.md](ASSETS.md).
-- KTX2/GLB compression isn't needed yet, since all geometry is procedural and textures are tiny SVGs.
-  It becomes worthwhile once licensed photography or a scanned bag model arrives.
+See [ASSETS.md](ASSETS.md) for sources, substitutions and what still needs approval.

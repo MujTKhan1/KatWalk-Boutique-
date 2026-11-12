@@ -36,18 +36,6 @@ export function buildSequenceTimeline(stage: HTMLElement) {
   );
   tl.set(q('[data-anim="hero-copy"]'), { pointerEvents: 'none' }, PHASE.approach[0] + 0.14);
 
-  /* ---- badge: ring turns with scroll, then the badge drops away with the copy */
-  tl.fromTo(q('[data-anim="badge-ring"]'), { rotation: 0 }, { rotation: 300, duration: PHASE.frame[1] }, 0);
-  tl.fromTo(
-    q('[data-anim="badge"]'),
-    { scale: 1, opacity: 1 },
-    { scale: 0.6, opacity: 0, duration: 0.1, ease: 'power2.in' },
-    PHASE.approach[0] + 0.06,
-  );
-
-  /* ---- ticker slides down out of frame */
-  tl.fromTo(q('[data-anim="ticker"]'), { yPercent: 0 }, { yPercent: 105, duration: 0.08, ease: 'power2.in' }, PHASE.approach[0]);
-
   /* ---- Chapter rail: active chapter is a pure function of progress (CSS handles the swap) */
   const rail = q('[data-anim="rail"]')[0] as HTMLElement | undefined;
   let lastChapter = -1;

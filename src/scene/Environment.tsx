@@ -1,38 +1,24 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { MAT, beamTexture, blobShadowTexture, sunTexture } from './materials';
-import { makeArcadeGeometry, makePortalGeometry, makeRunwayGeometry } from './geometry';
-import { sunState } from '../motion/choreography';
-import { store } from '../motion/store';
+import { mats, blobShadowTexture } from './materials';
+import { makeArchTrimGeometry, makeFacadeGeometry, makeRunwayGeometry, makeSlab } from './geometry';
+import { LAYOUT } from '../motion/choreography';
 
-/** Coral sun disc framed by the far portal; a pure function of scroll progress. */
-function Sun() {
-  const mesh = useRef<THREE.Mesh>(null);
-  useFrame(() => {
-    const m = mesh.current;
-    if (!m) return;
-    const s = sunState(store.p);
-    m.position.y = s.y;
-    m.scale.setScalar(5.2 * s.scale);
-  });
-  return (
-    <mesh ref={mesh} position={[0.4, 3.4, -17.8]} renderOrder={0}>
-      <planeGeometry args={[1, 1]} />
-      <meshBasicMaterial map={sunTexture()} transparent depthWrite={false} toneMapped={false} fog={false} />
-    </mesh>
-  );
-}
-
-/** Procedural reflections for chrome + soft ambient, no HDR download. */
+/**
+ * Directional daylight with soft real-time shadows (one shadow-casting light only),
+ * a warm sky/ground fill, and procedural reflections for chrome. No HDR download.
+ */
 export function Lighting() {
   const { gl, scene } = useThree();
+  const sun = useRef<THREE.DirectionalLight>(null);
+
   useEffect(() => {
     const pmrem = new THREE.PMREMGenerator(gl);
     const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     scene.environment = env;
-    scene.environmentIntensity = 0.5;
+    scene.environmentIntensity = 0.32;
     return () => {
       scene.environment = null;
       env.dispose();
@@ -40,72 +26,93 @@ export function Lighting() {
     };
   }, [gl, scene]);
 
+  useEffect(() => {
+    const l = sun.current;
+    if (!l) return;
+    l.target.position.set(2, 0, -4.5);
+    l.target.updateMatrixWorld();
+    const cam = l.shadow.camera as THREE.OrthographicCamera;
+    cam.left = -13;
+    cam.right = 13;
+    cam.top = 13;
+    cam.bottom = -13;
+    cam.near = 1;
+    cam.far = 48;
+    cam.updateProjectionMatrix();
+  }, []);
+
   return (
     <>
-      {/* lower ambient + stronger warm key from front-left = real form on pedestal and runway */}
-      <hemisphereLight args={['#FFF3EE', '#E9A5B8', 0.78]} />
-      <directionalLight position={[-9, 6, 2.5]} intensity={2.0} color="#FFF0E4" />
-      <directionalLight position={[7, 3, -5]} intensity={0.45} color="#FFC9D6" />
+      <hemisphereLight args={['#FFF5EA', '#E6D8CC', 1.05]} />
+      {/* late-morning sun from front-left: it rakes across the plaster and pours through the arch */}
+      <directionalLight
+        ref={sun}
+        position={[-11, 11, 6]}
+        intensity={2.9}
+        color="#FFF0DC"
+        castShadow
+        shadow-mapSize={[2048, 2048]}
+        shadow-bias={-0.0004}
+        shadow-normalBias={0.03}
+        shadow-radius={5}
+      />
+      {/* soft interior bounce, no shadows */}
+      <directionalLight position={[4, 9, -8]} intensity={0.55} color="#FFE6DE" />
     </>
   );
 }
 
-function Beam({ position, rotation, scale }: { position: [number, number, number]; rotation: [number, number, number]; scale: [number, number, number] }) {
-  return (
-    <mesh position={position} rotation={rotation} scale={scale} renderOrder={2}>
-      <planeGeometry args={[1, 1]} />
-      <meshBasicMaterial map={beamTexture()} transparent opacity={0.16} depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} />
-    </mesh>
-  );
-}
-
-/** Ivory gallery: floor, curved blush runway, side arcades, portal and back wall. */
-export function Gallery() {
-  const geo = useMemo(
-    () => ({
+/** Warm ivory plaster boutique: facade with one entrance arch, interior room, curved runway. */
+export function Architecture() {
+  const { facadeDepth: fd, entranceX, entranceW, entranceH, room } = LAYOUT;
+  const geo = useMemo(() => {
+    const facadeLeft = -12;
+    const facadeW = 26;
+    return {
+      facade: makeFacadeGeometry(facadeW, 7.6, entranceX - facadeLeft, entranceW, entranceH, fd),
+      facadeLeft,
+      // stone base band either side of the entrance
+      baseL: makeSlab(entranceX - entranceW / 2 - facadeLeft, 0.34, 0.06),
+      baseR: makeSlab(facadeLeft + facadeW - (entranceX + entranceW / 2), 0.34, 0.06),
+      trim: makeArchTrimGeometry(entranceW - 0.04, entranceH - 0.02, 0.016),
+      side: makeSlab(-room.back + 0.3, 7.6, 0.3),
+      back: makeSlab(room.right - room.left + 0.6, 7.6, 0.3),
       runway: makeRunwayGeometry(),
-      arcadeL: makeArcadeGeometry(26, 7.5, 2.3, 4.6, 3.3),
-      arcadeR: makeArcadeGeometry(26, 7.5, 2.3, 4.6, 3.3),
-      portal: makePortalGeometry(22, 8, 11.2, 3.8, 5.6),
-    }),
-    [],
+      // shallow pilasters + lintel band framing the entrance: they catch the raking sun
+      pilaster: makeSlab(0.46, 5.5, 0.12),
+      lintel: makeSlab(entranceW + 2.6, 0.42, 0.14),
+    };
+  }, [entranceX, entranceW, entranceH, fd, room]);
+  useEffect(
+    () => () =>
+      Object.values(geo).forEach((g) => {
+        if (g instanceof THREE.BufferGeometry) g.dispose();
+      }),
+    [geo],
   );
-  useEffect(() => () => Object.values(geo).forEach((g) => g.dispose()), [geo]);
+  const m = mats();
 
   return (
     <group>
-      {/* floor */}
-      <mesh rotation-x={-Math.PI / 2} material={MAT.floor}>
-        <planeGeometry args={[80, 80]} />
+      <mesh rotation-x={-Math.PI / 2} material={m.floor} receiveShadow>
+        <planeGeometry args={[90, 90]} />
       </mesh>
+      <mesh geometry={geo.runway} material={m.runway} receiveShadow />
 
-      {/* runway */}
-      <mesh geometry={geo.runway} material={MAT.runway} />
+      {/* facade */}
+      <mesh geometry={geo.facade} material={m.facade} position={[geo.facadeLeft, 0, -fd / 2]} castShadow receiveShadow />
+      <mesh geometry={geo.baseL} material={m.wallBack} position={[geo.facadeLeft, 0, fd / 2]} receiveShadow />
+      <mesh geometry={geo.baseR} material={m.wallBack} position={[entranceX + entranceW / 2, 0, fd / 2]} receiveShadow />
+      {/* one strong entrance arch, lined with a fine chrome trim */}
+      <mesh geometry={geo.trim} material={m.chrome} position={[entranceX, 0, fd / 2 + 0.012]} />
+      <mesh geometry={geo.pilaster} material={m.facade} position={[entranceX - entranceW / 2 - 0.86, 0, fd / 2]} castShadow receiveShadow />
+      <mesh geometry={geo.pilaster} material={m.facade} position={[entranceX + entranceW / 2 + 0.4, 0, fd / 2]} castShadow receiveShadow />
+      <mesh geometry={geo.lintel} material={m.facade} position={[entranceX - entranceW / 2 - 1.3, 5.5, fd / 2]} castShadow receiveShadow />
 
-      {/* left arcade: wall runs along -z; shape x -> world -z */}
-      <mesh geometry={geo.arcadeL} material={MAT.wall} position={[-4.6, 0, 9]} rotation-y={Math.PI / 2} />
-      <mesh material={MAT.wallShade} position={[-7.2, 3.75, -4]} rotation-y={Math.PI / 2}>
-        <planeGeometry args={[26, 7.5]} />
-      </mesh>
-
-      {/* right arcade */}
-      <mesh geometry={geo.arcadeR} material={MAT.wall} position={[6.9, 0, -17]} rotation-y={-Math.PI / 2} />
-      <mesh material={MAT.wallShade} position={[9.6, 3.75, -4]} rotation-y={-Math.PI / 2}>
-        <planeGeometry args={[26, 7.5]} />
-      </mesh>
-
-      {/* portal across the path, opening centred on the far runway */}
-      <mesh geometry={geo.portal} material={MAT.wallRose} position={[-11.2 + 0.4, 0, -12.2]} />
-      {/* back wall, peach, with the coral sun in front of it */}
-      <mesh material={MAT.backWall} position={[0, 4, -18]}>
-        <planeGeometry args={[30, 8]} />
-      </mesh>
-      <Sun />
-
-      {/* sunlight shafts */}
-      <Beam position={[-2.4, 2.6, -2.5]} rotation={[0, 0.5, -0.55]} scale={[1.6, 7, 1]} />
-      <Beam position={[4.6, 2.8, -5.5]} rotation={[0, -0.6, -0.5]} scale={[1.3, 6.5, 1]} />
-      <Beam position={[-1.0, 3.0, -10]} rotation={[0, 0.2, -0.45]} scale={[1.8, 7, 1]} />
+      {/* interior */}
+      <mesh geometry={geo.side} material={m.wall} position={[room.left - 0.3, 0, -fd / 2]} rotation-y={Math.PI / 2} castShadow receiveShadow />
+      <mesh geometry={geo.side} material={m.wall} position={[room.right + 0.3, 0, room.back - 0.3]} rotation-y={-Math.PI / 2} castShadow receiveShadow />
+      <mesh geometry={geo.back} material={m.wallBack} position={[room.left - 0.3, 0, room.back - 0.3]} receiveShadow />
     </group>
   );
 }

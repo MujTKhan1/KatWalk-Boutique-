@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { store } from '../motion/store';
 import { PALETTE } from './materials';
 import { CameraRig } from './CameraRig';
-import { Gallery, Lighting } from './Environment';
+import { Architecture, Lighting } from './Environment';
 import { Display } from './Display';
 import { Panels } from './Panels';
 
@@ -73,20 +73,21 @@ export default function SceneCanvas(props: Props) {
     <SceneBoundary onFailure={props.onFailure}>
       <Canvas
         frameloop="demand"
+        shadows="soft"
         dpr={[1, 1.75]}
-        camera={{ fov: 30, near: 0.1, far: 60, position: [0.15, 1.55, 7.4] }}
+        camera={{ fov: 30, near: 0.1, far: 80, position: [1.15, 1.75, 13.6] }}
         gl={{ antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: !!props.capture, alpha: false }}
         onCreated={({ gl, scene }) => {
           gl.toneMapping = THREE.NeutralToneMapping;
-          gl.toneMappingExposure = 1.0;
+          gl.toneMappingExposure = 1.12;
           scene.background = new THREE.Color(PALETTE.air);
-          scene.fog = new THREE.Fog(PALETTE.air, 11, 34);
+          scene.fog = new THREE.Fog(PALETTE.air, 16, 46);
         }}
       >
         <CameraRig />
         <Bridge {...props} />
         <Lighting />
-        <Gallery />
+        <Architecture />
         <Display />
         <Panels />
       </Canvas>

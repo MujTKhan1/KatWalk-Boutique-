@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { HERO_STILL, LOOKBOOK } from '../content/lookbook';
 import type { StaticReason } from '../hooks/useExperienceMode';
-import { HeroCopy, HeroTicker } from './HeroCopy';
+import { HeroCopy } from './HeroCopy';
 import { LookbookPreview } from './Lookbook';
 
 const REASON_COPY: Partial<Record<NonNullable<StaticReason>, string>> = {
@@ -38,7 +38,6 @@ export function StaticExperience({ reason }: { reason: StaticReason }) {
           )}
         </div>
         <HeroCopy immersive={false} />
-        <HeroTicker />
         <p className="demo-note">Concept demo · Imagery is illustrative</p>
       </section>
       <section className="static-lookbook" id="lookbook" aria-label="Style edits" tabIndex={-1}>

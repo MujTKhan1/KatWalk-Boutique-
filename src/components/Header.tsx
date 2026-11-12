@@ -13,6 +13,9 @@ export function Header() {
             <a href="#lookbook">Style edits</a>
           </li>
           <li>
+            <a href="#featured">Featured</a>
+          </li>
+          <li>
             <a href="#story">The boutique</a>
           </li>
         </ul>

@@ -21,6 +21,8 @@ export type SequenceStore = {
   /** HTML card media elements the WebGL panels align with at the handoff */
   cardEls: (HTMLElement | null)[];
   invalidate: () => void;
+  /** jump the damped value straight to the scroll position (used behind page transitions) */
+  snap: () => void;
 };
 
 export const store: SequenceStore = {
@@ -34,6 +36,7 @@ export const store: SequenceStore = {
   visible: true,
   cardEls: [],
   invalidate: () => {},
+  snap: () => {},
 };
 
 export function resetStore() {
@@ -44,4 +47,5 @@ export function resetStore() {
   store.pointerSmooth.x = store.pointerSmooth.y = 0;
   store.intro = 0;
   store.invalidate = () => {};
+  store.snap = () => {};
 }

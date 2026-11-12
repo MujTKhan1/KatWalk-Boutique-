@@ -66,58 +66,6 @@ export function HeroCopy({ immersive }: { immersive: boolean }) {
           Discover Katwalk
         </a>
       </div>
-      {immersive && <EditBadge />}
-    </div>
-  );
-}
-
-/**
- * Circular "new season edit" badge. Its outer ring is rotated by the scroll timeline
- * (reversible); the inner idle spin is decorative and disabled for reduced motion.
- */
-function EditBadge() {
-  return (
-    <a className="edit-badge" href="#lookbook" data-anim="badge" aria-label="Explore the new season edit">
-      <span className="edit-badge-ring" data-anim="badge-ring" aria-hidden="true">
-        <svg viewBox="0 0 120 120" className="edit-badge-text">
-          <defs>
-            <path id="badge-circle" d="M60 60m-46 0a46 46 0 1 1 92 0a46 46 0 1 1 -92 0" />
-          </defs>
-          <text>
-            <textPath href="#badge-circle" startOffset="0" textLength="286" lengthAdjust="spacing">
-              New season edit · Street to runway ·
-            </textPath>
-          </text>
-        </svg>
-      </span>
-      <span className="edit-badge-core" aria-hidden="true">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <path d="M11 3v15M4.5 11.5 11 18l6.5-6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </span>
-    </a>
-  );
-}
-
-/** Slow editorial ticker along the base of the hero (decorative; content is repeated elsewhere). */
-export function HeroTicker() {
-  const items = ['Street Chic', 'Statement Pieces', 'After-Dark Looks', 'Your Street. Your Runway.'];
-  const row = (
-    <span className="ticker-row">
-      {items.map((t) => (
-        <span key={t} className="ticker-item">
-          {t}
-          <span className="ticker-star">✦</span>
-        </span>
-      ))}
-    </span>
-  );
-  return (
-    <div className="hero-ticker" data-anim="ticker" aria-hidden="true">
-      <div className="ticker-track">
-        {row}
-        {row}
-      </div>
     </div>
   );
 }

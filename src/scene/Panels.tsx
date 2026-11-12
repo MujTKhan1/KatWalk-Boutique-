@@ -2,19 +2,16 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { LOOKBOOK, PANEL_ASPECT } from '../content/lookbook';
-import { PANEL_RUNWAY, glPanelsVisible, panelResolve, panelRise, veilOpacity } from '../motion/choreography';
+import { PANEL_WALL, galleryLight, glPanelsVisible, panelResolve, veilOpacity } from '../motion/choreography';
 import { store } from '../motion/store';
-import { PALETTE, blobShadowTexture } from './materials';
+import { PALETTE, mats } from './materials';
 
-/** Distance in front of the camera at which panels lock to their HTML cards. */
+/** Distance in front of the camera at which prints lock to their HTML cards. */
 const LOCK_DEPTH = 2.4;
 const VEIL_DEPTH = 2.6;
 
-/**
- * Load a panel texture without suspending. On failure a flat blush texture is used,
- * so a missing image never breaks the scene (the HTML card shows its alt text).
- */
-function usePanelTexture(src: string) {
+/** Load a print texture without suspending; a flat blush fallback keeps the scene intact on failure. */
+function usePrintTexture(src: string) {
   const { gl, invalidate } = useThree();
   const [tex, setTex] = useState<THREE.Texture | null>(null);
   useEffect(() => {
@@ -43,7 +40,7 @@ function usePanelTexture(src: string) {
         loaded.colorSpace = THREE.SRGBColorSpace;
         setTex(loaded);
         invalidate();
-        console.warn(`[katwalk] panel image failed to load: ${src}`);
+        console.warn(`[katwalk] print image failed to load: ${src}`);
       },
     );
     return () => {
@@ -54,34 +51,79 @@ function usePanelTexture(src: string) {
   return tex;
 }
 
-const _runPos = new THREE.Vector3();
-const _runQuat = new THREE.Quaternion();
-const _lockPos = new THREE.Vector3();
-const _euler = new THREE.Euler();
+let _wash: THREE.Texture | null = null;
+/** Soft cone of warm light from a picture lamp, as a texture (no extra real-time lights). */
+function washTexture() {
+  if (_wash) return _wash;
+  const c = document.createElement('canvas');
+  c.width = 128;
+  c.height = 256;
+  const g = c.getContext('2d')!;
+  const grad = g.createRadialGradient(64, 0, 4, 64, 40, 230);
+  grad.addColorStop(0, 'rgba(255,236,214,0.95)');
+  grad.addColorStop(0.5, 'rgba(255,236,214,0.25)');
+  grad.addColorStop(1, 'rgba(255,236,214,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 128, 256);
+  _wash = new THREE.CanvasTexture(c);
+  _wash.colorSpace = THREE.SRGBColorSpace;
+  return _wash;
+}
 
-function Panel({ index }: { index: number }) {
+/** Static wall frame: brushed-nickel moulding, ivory mat, picture lamp + light wash. */
+function Frame({ index }: { index: number }) {
+  const cfg = PANEL_WALL[index];
+  const h = cfg.height;
+  const w = h * PANEL_ASPECT;
+  const wash = useRef<THREE.Mesh>(null);
+  useFrame(() => {
+    if (wash.current) (wash.current.material as THREE.MeshBasicMaterial).opacity = 0.32 * galleryLight(store.p);
+  });
+  const m = mats();
+  return (
+    <group position={[cfg.pos.x, cfg.pos.y, cfg.pos.z]}>
+      <mesh position={[0, 0, -0.03]} material={m.nickel} castShadow>
+        <boxGeometry args={[w + 0.16, h + 0.16, 0.05]} />
+      </mesh>
+      <mesh position={[0, 0, -0.002]} material={m.mat} receiveShadow>
+        <boxGeometry args={[w + 0.1, h + 0.1, 0.03]} />
+      </mesh>
+      {/* picture lamp */}
+      <mesh position={[0, h / 2 + 0.28, 0.14]} rotation-z={Math.PI / 2} material={m.nickel}>
+        <cylinderGeometry args={[0.025, 0.025, Math.min(0.9, w * 0.6), 20]} />
+      </mesh>
+      <mesh position={[0, h / 2 + 0.2, 0.06]} material={m.nickel}>
+        <boxGeometry args={[0.02, 0.16, 0.02]} />
+      </mesh>
+      <mesh ref={wash} position={[0, 0.25, 0.02]} renderOrder={2}>
+        <planeGeometry args={[w + 0.9, h + 0.9]} />
+        <meshBasicMaterial map={washTexture()} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} />
+      </mesh>
+    </group>
+  );
+}
+
+const _wallPos = new THREE.Vector3();
+const _wallQuat = new THREE.Quaternion();
+const _lockPos = new THREE.Vector3();
+
+/** The print itself: hangs in its frame, then lifts out and flies onto its HTML card. */
+function Print({ index }: { index: number }) {
   const edit = LOOKBOOK[index];
-  const cfg = PANEL_RUNWAY[index];
-  const tex = usePanelTexture(edit.src);
-  const group = useRef<THREE.Group>(null);
-  const image = useRef<THREE.Mesh>(null);
-  const mount = useRef<THREE.Mesh>(null);
-  const shadow = useRef<THREE.Mesh>(null);
+  const cfg = PANEL_WALL[index];
+  const tex = usePrintTexture(edit.src);
+  const mesh = useRef<THREE.Mesh>(null);
   const { camera, gl } = useThree();
 
   useFrame(() => {
-    const g = group.current;
-    if (!g) return;
+    const me = mesh.current;
+    if (!me) return;
     const p = store.p;
     const cam = camera as THREE.PerspectiveCamera;
-
-    // --- runway pose (rise from below the runway surface; the floor hides the sunk part)
-    const rise = panelRise(index, p);
     const h = cfg.height;
-    _runPos.set(cfg.pos.x, h / 2 + 0.06 - (1 - rise) * (h + 0.25), cfg.pos.z);
-    _runQuat.setFromEuler(_euler.set(0, cfg.rotY, 0));
+    _wallPos.set(cfg.pos.x, cfg.pos.y, cfg.pos.z + 0.016);
+    _wallQuat.identity();
 
-    // --- lock pose: unproject the HTML card rect onto a plane LOCK_DEPTH in front of the camera
     const t = panelResolve(index, p);
     let scale = h;
     if (t > 0) {
@@ -96,58 +138,31 @@ function Panel({ index }: { index: number }) {
         _lockPos.set(nx * halfW, ny * halfH, -LOCK_DEPTH);
         cam.localToWorld(_lockPos);
         const lockScale = (r.height / canvasRect.height) * 2 * halfH;
-        g.position.lerpVectors(_runPos, _lockPos, t);
-        g.quaternion.slerpQuaternions(_runQuat, cam.quaternion, t);
+        me.position.lerpVectors(_wallPos, _lockPos, t);
+        me.quaternion.slerpQuaternions(_wallQuat, cam.quaternion, t);
         scale = THREE.MathUtils.lerp(h, lockScale, t);
       }
     } else {
-      g.position.copy(_runPos);
-      g.quaternion.copy(_runQuat);
+      me.position.copy(_wallPos);
+      me.quaternion.copy(_wallQuat);
     }
-    g.scale.setScalar(scale);
-    g.visible = glPanelsVisible(p);
-
-    // On the way to the card the panel must not be clipped by gallery geometry,
-    // and the paper mount + floor shadow fade out so the result is exactly the card.
+    me.scale.setScalar(scale);
+    me.visible = glPanelsVisible(p);
     const flying = t > 0.001;
-    const im = image.current!.material as THREE.MeshBasicMaterial;
-    im.depthTest = !flying;
-    image.current!.renderOrder = flying ? 20 + index : 3;
-    const mm = mount.current!.material as THREE.MeshBasicMaterial;
-    mm.opacity = 1 - Math.min(1, t * 2.5);
-    mm.depthTest = !flying;
-    mount.current!.renderOrder = flying ? 19 : 3;
-    mount.current!.visible = mm.opacity > 0.001;
-    const sm = shadow.current!.material as THREE.MeshBasicMaterial;
-    sm.opacity = 0.75 * rise * (1 - t);
-    shadow.current!.position.set(cfg.pos.x, 0.008, cfg.pos.z + 0.15);
+    (me.material as THREE.MeshBasicMaterial).depthTest = !flying;
+    me.renderOrder = flying ? 20 + index : 3;
   });
 
-  const w = PANEL_ASPECT;
   return (
-    <>
-      <group ref={group}>
-        {/* thin ivory paper mount behind the print */}
-        <mesh ref={mount} position={[0, 0, -0.004]}>
-          <planeGeometry args={[w * 1.06, 1.045]} />
-          <meshBasicMaterial color="#FFFDFB" transparent toneMapped={false} side={THREE.DoubleSide} />
-        </mesh>
-        <mesh ref={image}>
-          <planeGeometry args={[w, 1]} />
-          {/* unlit + no tone mapping: renders the image pixel-identical to the HTML <img> */}
-          {/* keyed so the shader recompiles when the map arrives */}
-          <meshBasicMaterial key={tex ? tex.uuid : 'none'} map={tex} color={tex ? '#ffffff' : PALETTE.blush} toneMapped={false} fog={false} transparent />
-        </mesh>
-      </group>
-      <mesh ref={shadow} rotation-x={-Math.PI / 2} scale={[1.9, 0.7, 1]} renderOrder={1}>
-        <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial map={blobShadowTexture()} transparent depthWrite={false} toneMapped={false} />
-      </mesh>
-    </>
+    <mesh ref={mesh}>
+      <planeGeometry args={[PANEL_ASPECT, 1]} />
+      {/* unlit + no tone mapping: renders pixel-identical to the HTML <img> at the handoff */}
+      <meshBasicMaterial key={tex ? tex.uuid : 'none'} map={tex} color={tex ? '#ffffff' : PALETTE.blush} toneMapped={false} fog={false} transparent />
+    </mesh>
   );
 }
 
-/** Ivory veil that settles in front of the gallery so the lookbook reads on a calm ground. */
+/** Ivory veil that settles in front of the room so the lookbook reads on a calm ground. */
 function Veil() {
   const mesh = useRef<THREE.Mesh>(null);
   const { camera } = useThree();
@@ -179,7 +194,10 @@ export function Panels() {
   return (
     <>
       {LOOKBOOK.map((e, i) => (
-        <Panel key={e.id} index={i} />
+        <group key={e.id}>
+          <Frame index={i} />
+          <Print index={i} />
+        </group>
       ))}
       <Veil />
     </>

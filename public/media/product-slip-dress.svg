@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000"><defs>
+<linearGradient id="sbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A3034"/><stop offset="1" stop-color="#231F22"/></linearGradient>
+<linearGradient id="sniche" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4A3D42"/><stop offset="1" stop-color="#2C2629"/></linearGradient>
+<linearGradient id="sfloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A2427"/><stop offset="1" stop-color="#231F22"/></linearGradient>
+
+<linearGradient id="satin" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#C98E9C"/><stop offset=".35" stop-color="#F7CED8"/><stop offset=".55" stop-color="#FBE3E8"/><stop offset="1" stop-color="#B57A89"/></linearGradient>
+<radialGradient id="rim" cx=".5" cy=".45" r=".5"><stop offset="0" stop-color="#F7CED8" stop-opacity=".25"/><stop offset="1" stop-color="#F7CED8" stop-opacity="0"/></radialGradient><filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.14  0 0 0 0 0.13  0 0 0 0 0.14  0 0 0 0.06 0"/></filter><filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="16"/></filter></defs>
+<rect width="800" height="1000" fill="url(#sbg)"/>
+<path d="M170 840V380a230 230 0 0 1 460 0v460z" fill="url(#sniche)"/>
+<rect y="840" width="800" height="160" fill="url(#sfloor)"/>
+
+<rect width="800" height="1000" fill="url(#rim)"/>
+<path d="M400 246c0-20 15-24 15-40 0-14-12-22-24-15" fill="none" stroke="#F3DCE1" stroke-width="4" stroke-linecap="round"/>
+<path d="M400 246 276 310h248z" fill="none" stroke="#F3DCE1" stroke-width="4" stroke-linejoin="round"/>
+<path d="M344 310l14 104M456 310l-14 104" stroke="#F3DCE1" stroke-width="3"/>
+<path d="M352 412q48 28 96 0l24 96q30 230 74 320-146 34-292 0 44-90 74-320z" fill="url(#satin)"/>
+<path d="M352 412q48 44 96 0" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="3"/>
+<path d="M420 450q16 200 70 370" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="10" stroke-linecap="round"/>
+<ellipse cx="400" cy="850" rx="170" ry="16" fill="#F7CED8" opacity=".12" filter="url(#soft)"/><rect width="800" height="1000" filter="url(#grain)"/></svg>

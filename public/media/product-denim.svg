@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000"><defs>
+<linearGradient id="sbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F3ECE4"/><stop offset="1" stop-color="#E4D9CE"/></linearGradient>
+<linearGradient id="sniche" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBF7F2"/><stop offset="1" stop-color="#ECE2D8"/></linearGradient>
+<linearGradient id="sfloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E2D6CA"/><stop offset="1" stop-color="#E4D9CE"/></linearGradient>
+
+<linearGradient id="den" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3E5577"/><stop offset=".45" stop-color="#5F7699"/><stop offset=".55" stop-color="#56709A"/><stop offset="1" stop-color="#34496A"/></linearGradient><filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.14  0 0 0 0 0.13  0 0 0 0 0.14  0 0 0 0.06 0"/></filter><filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="16"/></filter></defs>
+<rect width="800" height="1000" fill="url(#sbg)"/>
+<path d="M170 840V380a230 230 0 0 1 460 0v460z" fill="url(#sniche)"/>
+<rect y="840" width="800" height="160" fill="url(#sfloor)"/>
+
+<path d="M286 250h228l-2 40H288z" fill="#3A4F70"/>
+<path d="M288 290h224l50 540H420l-20-380-20 380H238z" fill="url(#den)"/>
+<path d="M400 296v150" stroke="#C9A46B" stroke-width="3" stroke-dasharray="6 6"/>
+<path d="M300 300q30 60 2 110M500 300q-30 60-2 110" fill="none" stroke="#C9A46B" stroke-opacity=".8" stroke-width="2.5" stroke-dasharray="6 6"/>
+<path d="M330 470q-16 180-60 350M470 470q16 180 60 350" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="14" stroke-linecap="round"/>
+<rect x="390" y="258" width="20" height="22" rx="3" fill="#C9A46B"/>
+<ellipse cx="400" cy="845" rx="200" ry="18" fill="#3A3236" opacity=".14" filter="url(#soft)"/><rect width="800" height="1000" filter="url(#grain)"/></svg>

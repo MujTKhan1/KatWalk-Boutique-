@@ -95,13 +95,13 @@ GRAIN = ('<filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulenc
          'numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.14  0 0 0 0 0.13  0 0 0 0 0.14  0 0 0 0.07 0"/></filter>'
          '<filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>')
 PANEL_DEFS = DEFS + GRAIN + """
-<linearGradient id="pbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE6DE"/><stop offset="1" stop-color="#F9C9D3"/></linearGradient>
-<radialGradient id="psun" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#FFA08F"/><stop offset="1" stop-color="#FF786B"/></radialGradient>
+<linearGradient id="pbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6E7DE"/><stop offset="1" stop-color="#EBCFCF"/></linearGradient>
+<linearGradient id="parch" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6F1"/><stop offset="1" stop-color="#F3D3D8"/></linearGradient>
 <linearGradient id="pplinth" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFE9EE"/><stop offset=".6" stop-color="#F7CED8"/><stop offset="1" stop-color="#E8AEBD"/></linearGradient>
 """
 panel = """
 <rect width="800" height="1000" fill="url(#pbg)"/>
-<circle cx="540" cy="330" r="210" fill="url(#psun)"/>
+<path d="M200 1000V420a200 200 0 0 1 400 0v580z" fill="url(#parch)"/><path d="M200 420a200 200 0 0 1 400 0" fill="none" stroke="#FFFFFF" stroke-opacity=".8" stroke-width="3"/>
 <line x1="80" y1="140" x2="720" y2="140" stroke="#242124" stroke-opacity=".2" stroke-width="2"/>
 <ellipse cx="400" cy="735" rx="240" ry="26" fill="#7E1D40" opacity=".14" filter="url(#soft)"/>
 <rect x="230" y="730" width="340" height="270" fill="url(#pplinth)"/>
