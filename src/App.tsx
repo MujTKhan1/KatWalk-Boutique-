@@ -4,7 +4,8 @@ import { useExperienceMode } from './hooks/useExperienceMode';
 import { Header, SkipLink } from './components/Header';
 import { Sequence } from './components/Sequence';
 import { StaticExperience } from './components/StaticExperience';
-import { FeaturedDrop, PageCurtain, SiteFooter, SocialGallery, Story, Visit } from './components/Sections';
+import { FeaturedDrop, PageCurtain, SiteFooter, Story, Visit } from './components/Sections';
+import { SocialOrbit } from './components/SocialOrbit';
 import { useReveals } from './motion/useReveals';
 import { usePageTransitions } from './motion/usePageTransitions';
 
@@ -33,7 +34,7 @@ export default function App() {
         )}
         <FeaturedDrop />
         <Story />
-        <SocialGallery />
+        <SocialOrbit />
         <Visit />
       </main>
       <SiteFooter />

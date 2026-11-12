@@ -31,7 +31,10 @@ npm run preview    # serve the production build on http://localhost:4173
    arrives, and the heading clears the fixed header.
 2. **Featured drop**: four clearly labelled demo pieces, no prices or stock.
 3. **Boutique story**: proposed copy with a word-by-word reading reveal.
-4. **Social gallery**: illustrative tiles; handle shown but not linked until ownership is confirmed.
+4. **Social feed orbit**: a pinned scene (340vh). The giant words "BOUTIQUE" and "FEED." frame six photos
+   riding a tilted CSS 3D ring with a glowing lime orbit line. Scroll turns the ring, and an info card tracks
+   the front photo (01 / 06, code, title, caption). Mobile and reduced motion get a simple grid. The handle is
+   shown but not linked until ownership is confirmed.
 5. **Find Your Next Look**: closing section; the inquiry route awaits approval, so no form is shown.
 
 ## Art direction
