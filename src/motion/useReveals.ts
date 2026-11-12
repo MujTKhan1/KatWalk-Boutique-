@@ -42,6 +42,16 @@ export function useReveals(deps: unknown[]) {
           { opacity: 1, y: 0, ease: 'none', stagger: 0.15, scrollTrigger: { trigger: el, start: 'top 90%', end: 'top 35%', scrub: 0.6 } },
         );
       });
+      gsap.utils.toArray<HTMLElement>('[data-reveal="statement"]').forEach((el) => {
+        const st = { trigger: el, start: 'top 85%', end: 'bottom 50%', scrub: 0.6 };
+        const tl = gsap.timeline({ scrollTrigger: st, defaults: { ease: 'none' } });
+        tl.fromTo(el.querySelectorAll('.line'), { yPercent: 110 }, { yPercent: 0, duration: 0.5, stagger: 0.18 }, 0);
+        el.querySelectorAll<HTMLElement>('.pill').forEach((pill, i) => {
+          const at = 0.25 + i * 0.18;
+          tl.fromTo(pill, { clipPath: 'inset(0% 50% 0% 50% round 999px)' }, { clipPath: 'inset(0% 0% 0% 0% round 999px)', duration: 0.45 }, at);
+          tl.fromTo(pill.querySelector('img'), { scale: 1.35 }, { scale: 1, duration: 0.6 }, at);
+        });
+      });
       gsap.utils.toArray<HTMLElement>('[data-reveal="words"]').forEach((el) => {
         gsap.fromTo(
           el.querySelectorAll('.w'),

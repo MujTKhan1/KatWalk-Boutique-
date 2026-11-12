@@ -43,12 +43,12 @@ export const FEATURED: DemoProduct[] = [
   },
   {
     id: 'denim',
-    name: 'Dark',
+    name: 'Easy',
     accent: 'Denim',
     category: 'Denim',
-    note: 'Jacket and jeans, worn as one clean line.',
+    note: 'A washed denim jacket, styled your way.',
     src: '/media/photos/product-denim.webp',
-    alt: 'A woman in a black denim jacket and jeans stands in front of an ornate tiled wall.',
+    alt: 'A woman in a light blue denim jacket with flowers in her hair, against a bright backdrop.',
   },
 ];
 
@@ -57,7 +57,7 @@ export const SOCIAL_TILES = [
   { src: '/media/photos/story-pink-coat.webp', pos: '50% 40%', alt: 'A woman in a pink coat against a pink wall.', title: 'Pink Coat', caption: 'Oversized colour with a city edge' },
   { src: '/media/photos/print-after-dark.webp', pos: '50% 35%', alt: 'Red satin evening dress.', title: 'After Dark', caption: 'Satin, sheen and a little drama' },
   { src: '/media/photos/product-tote.webp', pos: '50% 55%', alt: 'Tan leather tote.', title: 'The Carry', caption: 'Soft leather for every day' },
-  { src: '/media/photos/print-street-chic.webp', pos: '50% 30%', alt: 'Black leather jacket street look.', title: 'Street Walk', caption: 'Leather and clean lines' },
+  { src: '/media/photos/print-street-chic.webp', pos: '50% 30%', alt: 'Camel coat and white jeans street look.', title: 'Street Walk', caption: 'Camel layers and clean whites' },
   { src: '/media/photos/story-boutique-rail.webp', pos: '50% 50%', alt: 'Boutique clothing rails.', title: 'On the Rail', caption: 'New pieces, freshly hung' },
   { src: '/media/photos/print-statement.webp', pos: '50% 45%', alt: 'Long black coat with a red bag.', title: 'Statement', caption: 'Long coat, red bag, no rules' },
 ];

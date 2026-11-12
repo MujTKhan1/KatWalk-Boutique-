@@ -24,9 +24,9 @@ export const LOOKBOOK: LookbookEdit[] = [
     index: '01',
     title: 'Street',
     accent: 'Chic',
-    blurb: 'Leather, clean lines, everyday confidence.',
+    blurb: 'Camel layers, clean whites, everyday confidence.',
     src: '/media/photos/print-street-chic.webp',
-    alt: 'A woman in a black leather jacket and black trousers walks toward the camera on a city street.',
+    alt: 'A woman in a camel coat, white top and white jeans walks confidently down a city street.',
   },
   {
     id: 'statement-pieces',

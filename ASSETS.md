@@ -27,13 +27,13 @@ Downloaded through the Unsplash CDN at 1000×1250 WebP crops. Licence confirmed 
 
 | File | Photographer | Source |
 | --- | --- | --- |
-| `print-street-chic.webp` | Marcel Strauß | https://unsplash.com/photos/1FnVSX5flT8 |
+| `print-street-chic.webp` | Vladimir Yelizarov | https://unsplash.com/photos/C43tCJffOh4 |
 | `print-statement.webp` | Jahanzeb Ahsan (page also credits @mukhina_mira) | https://unsplash.com/photos/phWzbhrgvH0 |
 | `print-after-dark.webp` | FOTOGRAFÍA EDITORIAL | https://unsplash.com/photos/ZKPEw9BWFC8 |
 | `product-tote.webp` | Ugluk Potroshitel | https://unsplash.com/photos/XwjrPFW7xw0 |
 | `product-coats.webp` | Priscilla Du Preez | https://unsplash.com/photos/my5cwTzhmNI |
 | `product-satin.webp` | PRAHANT STUDIO | https://unsplash.com/photos/rDExPGnIuuc |
-| `product-denim.webp` | Mehrpouya H | https://unsplash.com/photos/3k5PytIyuBQ |
+| `product-denim.webp` | Calvin Visuals | https://unsplash.com/photos/Mx4auh5zO4w |
 | `story-pink-coat.webp` | Sasha Matveeva | https://unsplash.com/photos/pyPI14RrbvM |
 | `story-boutique-rail.webp` | Clark Street Mercantile | https://unsplash.com/photos/qnKhZJPKFD8 |
 

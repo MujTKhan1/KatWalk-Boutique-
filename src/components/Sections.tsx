@@ -1,5 +1,4 @@
 import { FEATURED, SOCIAL_HANDLE, SOCIAL_TILES, STORY_IMAGES } from '../content/site';
-import { words } from '../motion/useReveals';
 
 /* ------------------------------------------------------------------ Featured drop */
 export function FeaturedDrop() {
@@ -48,8 +47,22 @@ export function FeaturedDrop() {
 }
 
 /* ------------------------------------------------------------------ Boutique story */
-const STORY =
-  'Katwalk is where the street meets the runway. Every piece is chosen to be mixed, layered and made entirely yours, because personal style is the whole point.';
+const STORY = 'Where the street meets the runway, made yours.';
+
+const PILLS = [
+  { src: '/media/photos/print-street-chic.webp', pos: '50% 22%' },
+  { src: '/media/photos/print-after-dark.webp', pos: '50% 30%' },
+  { src: '/media/photos/product-tote.webp', pos: '50% 52%' },
+];
+
+/** Rounded photo capsule set inline with display type; opens from the centre on scroll. */
+function Pill({ src, pos, wide = false }: { src: string; pos: string; wide?: boolean }) {
+  return (
+    <span className={wide ? 'pill pill--wide' : 'pill'}>
+      <img src={src} alt="" style={{ objectPosition: pos }} loading="lazy" decoding="async" />
+    </span>
+  );
+}
 
 export function Story() {
   return (
@@ -60,14 +73,25 @@ export function Story() {
       <h2 className="sr-only" id="story-title">
         About Katwalk
       </h2>
-      <p className="story-statement" data-reveal="words">
+      {/* short display statement with inline photo pills (decorative; full sentence for AT) */}
+      <p className="story-statement" data-reveal="statement">
         <span className="sr-only">{STORY}</span>
         <span aria-hidden="true">
-          {words(STORY).map(({ w, key }) => (
-            <span className="w" key={key}>
-              {w}{' '}
+          <span className="line-mask">
+            <span className="line">
+              Where the street <Pill src={PILLS[0].src} pos={PILLS[0].pos} />
             </span>
-          ))}
+          </span>
+          <span className="line-mask">
+            <span className="line">
+              <Pill src={PILLS[1].src} pos={PILLS[1].pos} /> meets <em>the runway,</em>
+            </span>
+          </span>
+          <span className="line-mask">
+            <span className="line">
+              made <Pill src={PILLS[2].src} pos={PILLS[2].pos} wide /> yours.
+            </span>
+          </span>
         </span>
       </p>
       <div className="story-grid">
@@ -77,8 +101,8 @@ export function Story() {
         <div className="story-copy" data-reveal="fade">
           <h3>Individual, not uniform.</h3>
           <p>
-            A boutique edit means fewer, better pieces: a statement bag, an easy bomber, the dress for later. Styled together,
-            they say something about the person wearing them.
+            Fewer, better pieces: a statement bag, an easy layer, the dress for later. Styled together, they say
+            something about you.
           </p>
           <p className="placeholder-note">
             Story copy is a proposal for review. Founding details, location and history to be confirmed with the boutique.
